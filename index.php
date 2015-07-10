@@ -1,18 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.8
+ * Email tester v 0.9
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-/**
- * Please install this file in a subfolder in the root of your Magento install.
- */
-
-$testerVersion = '0_8';
+$testerVersion = '0_9';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 $templates = array(
@@ -59,6 +55,8 @@ $templates = array(
 /* Search magento file
  -------------------------- */
 
+require_once ('inc/getdata.class.php');
+
 $_mageAppName = 'app/Mage.php';
 $_fileExists = false;
 for ($i = 0;$i < 5;$i++) {
@@ -101,7 +99,14 @@ foreach ($websites as $website) {
 $tpl = $_GET['template'];
 if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $templates)) {
 
-    echo '<!DOCTYPE HTML><html lang="en_EN"><head><meta charset="UTF-8" /><title>Mail preview</title></head><body><h1>Mail preview</h1>';
+    echo '<!DOCTYPE HTML><html lang="en_EN"><head>';
+    echo '<meta charset="UTF-8" /><title>Mail preview</title>';
+    echo '</head><body><h1>Mail preview</h1>';
+
+    if(isset($_GET['success'])){
+        echo '<p style="color:green">Mail has been successfully sent !</p>';
+    }
+
     echo '<form action="" method="get">';
     echo '<p><label for="template">Template :</label><br />';
     echo '<select id="template" name="template">';
@@ -115,7 +120,10 @@ if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $templates
         echo '<option value="' . $storeId . '"">' . $store->getName() . '</a></li>';
     }
     echo '</select></p>';
-    echo '<button type="submit">Preview</button>';
+    echo '<p id="box-email"><label for="email">Email</label><br />';
+    echo '<input type="email" id="email" name="email" value="" /></p>';
+    echo '<button type="submit" name="submit">Preview</button>';
+    echo '<button type="submit" name="send" autocomplete="email">Send by email</button>';
     echo '</form>';
     echo '</body></html>';
     die;
@@ -132,9 +140,9 @@ if (isset($_GET['store']) && array_key_exists($_GET['store'], $_stores)) {
 $_locale = Mage::getStoreConfig('general/locale/code', $_store);
 Mage::getSingleton('core/translate')->setLocale($_locale)->init('frontend', true);
 
-$datas = array(
-    'store' => $_stores[$_store]
-);
+$datas = $inteGentoEmailTester->getDefaultData();
+
+$datas['store'] = $_stores[$_store];
 
 /* New order template
  -------------------------- */
@@ -168,52 +176,21 @@ if (isset($templates[$tpl]['order'])) {
  -------------------------- */
 
 if ($tpl == 'sales_email_shipment_template' && is_object($datas['order'])) {
-    $datas['shipment'] = new Varien_Object();
-    $datas['shipment']->setData(array(
-        'increment_id' => '100000022'
-    ));
+    $datas['shipment'] = $inteGentoEmailTester->getShipment();
 }
 
 /* Credit memo
  -------------------------- */
 
 if ($tpl == 'sales_email_creditmemo_template' && is_object($datas['order'])) {
-
-    $datas['creditmemo'] = new Varien_Object();
-    $datas['creditmemo']->setData(array(
-        'increment_id' => '100000022'
-    ));
-
-    $h = Mage::getResourceModel('sales/order_creditmemo_collection');
-    $collection = $h->setPageSize(1)->setCurPage(1);
-    foreach ($collection as $item) {
-        $datas['creditmemo'] = $item;
-        break;
-    }
+    $datas['creditmemo'] = $inteGentoEmailTester->getCreditMemo();
 }
 
 /* Contact template
  -------------------------- */
 
 if ($tpl == 'contacts_email_email_template') {
-    $datas['data'] = new Varien_Object();
-    $datas['data']->setData(array(
-        'name' => 'Jean-Michel Lorem',
-        'email' => 'foo@bar.com',
-        'telephone' => '123-4567890',
-        'comment' => 'This is a test'
-    ));
-}
-
-/* Product share
- -------------------------- */
-
-if ($tpl == 'sendfriend_email_template') {
-    $datas['name'] = 'Jean-Michel Lorem';
-    $datas['product_url'] = 'https://github.com/Darklg';
-    $datas['product_name'] = 'Barre de faire';
-    $datas['product_image'] = 'http://placehold.it/75x75';
-    $datas['message'] = 'The world needs dreamers and the world needs doers. But above all, the world needs dreamers who do — Sarah Ban Breathnach. Everyone who has ever taken a shower has had an idea. It’s the person who gets out of the shower, dries off, and does something about it that makes a difference — Nolan Bushnell. ';
+    $datas['data'] = $inteGentoEmailTester->getData();
 }
 
 /* New account & Forgot password
@@ -233,7 +210,6 @@ if (isset($templates[$tpl]['customer'])) {
         $datas['customer']->setData('name', '****');
         $datas['customer']->setData('password', '****');
         $datas['customer']->setData('rp_token', md5('coucou'));
-        $datas['customerName'] = 'Mage Hento';
         Mage::app()->getCache()->save(serialize($datas) , $cacheId);
     }
 }
@@ -242,77 +218,38 @@ if (isset($templates[$tpl]['customer'])) {
  -------------------------- */
 
 if (isset($templates[$tpl]['alertGrid'])) {
-    $_nbProducts = 2;
-    $_stockProducts = array();
-    if ($tpl == 'catalog_productalert_email_price_template') {
-        $_stockBlock = Mage::helper('productalert')->createBlock('productalert/email_price');
-    }
-    else {
-        $_stockBlock = Mage::helper('productalert')->createBlock('productalert/email_stock');
-    }
-    $products = Mage::getModel('catalog/product')->getCollection()->setPageSize($_nbProducts);
-    foreach ($products as $prod) {
-        $product = Mage::getModel('catalog/product')->load($prod->getId());
-        $_stockProducts[$product->getId() ] = $product;
-        if (count($_stockProducts) >= $_nbProducts) {
-            break;
-        }
-    }
-    foreach ($_stockProducts as $product) {
-        $product->setCustomerGroupId($datas['customer']->getGroupId());
-        $_stockBlock->addProduct($product);
-    }
-
-    $datas['alertGrid'] = $_stockBlock->toHtml();
+    $datas['alertGrid'] = $inteGentoEmailTester->getAlertGrid($datas['customer']);
 }
 
 /* Subscription confirmation
  -------------------------- */
 
 if ($tpl == 'newsletter_subscription_confirm_email_template') {
-    $collection = Mage::getModel('newsletter/subscriber')->getCollection()->setPageSize(1)->setOrder('subscriber_id', 'desc');
-    foreach ($collection as $subscriber) {
-        $datas['subscriber'] = $subscriber;
-        break;
-    }
+    $datas['subscriber'] = $inteGentoEmailTester->getSubscriber();
 }
 
 /* Wishlist
  -------------------------- */
 
 if ($tpl == 'wishlist_email_email_template') {
-
-    // Get latest shared wishlist ID
-    $resource = Mage::getSingleton('core/resource');
-    $readConnection = $resource->getConnection('core_read');
-    $table = $resource->getTableName('wishlist/wishlist');
-    $wishlist_id = $readConnection->fetchCol('SELECT wishlist_id FROM ' . $table . ' WHERE shared=1 ORDER BY wishlist_id DESC LIMIT 0,1');
-
-    if (empty($wishlist_id)) {
-        $wishlist_id = array(
-            0
-        );
-    }
-
-    // Register wishlist
-    Mage::register('wishlist', Mage::getSingleton('wishlist/wishlist')->load($wishlist_id[0]));
-
-    // Load wishlist vars
-    $datas['salable'] = 'yes';
-    $datas['addAllLink'] = Mage::getUrl('*/shared/allcart', array(
-        'code' => 'foo'
-    ));
-    $datas['viewOnSiteLink'] = Mage::getUrl('*/shared/index', array(
-        'code' => 'foo'
-    ));
-    $datas['message'] = 'Buy this';
-    $datas['items'] = Mage::app()->getLayout()->createBlock('wishlist/share_email_items')->toHtml();
+    $datas['items'] = $inteGentoEmailTester->getWishlistItems();
+    $datas['message'] = 'Please buy this';
 }
 
 /* ----------------------------------------------------------
   Display template
 ---------------------------------------------------------- */
 
-header('Content-Type: text/html; charset=utf-8');
+if (isset($_GET['email'], $_GET['send']) && filter_var($_GET['email'], FILTER_VALIDATE_EMAIL) !== false) {
+    $email_template = Mage::getModel('core/email_template')->loadDefault($tpl);
+    $email_template->setSenderName(Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME));
+    $email_template->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'));
+    $email_template->send($_GET['email'], 'Email Tester', $datas);
+    header("Location: index.php?success=1");
+    return;
+}
+else {
+    header('Content-Type: text/html; charset=utf-8');
+    echo Mage::getModel('core/email_template')->load(3)->loadDefault($tpl)->getProcessedTemplate($datas);
+}
 
-echo Mage::getModel('core/email_template')->load(3)->loadDefault($tpl)->getProcessedTemplate($datas);
