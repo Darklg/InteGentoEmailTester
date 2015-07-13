@@ -20,37 +20,38 @@ $templates = array(
         'alertGrid' => 1,
         'customer' => 1,
     ) ,
-    'contacts_email_email_template' => 'contacts_email_email_template',
+    'contacts_email_email_template' => array() ,
     'customer_create_account_email_template' => array(
-        'customer' => 1
+        'customer' => 1,
     ) ,
     'customer_password_forgot_email_template' => array(
-        'customer' => 1
+        'customer' => 1,
     ) ,
-    'newsletter_subscription_confirm_email_template' => 'newsletter_subscription_confirm_email_template',
-    'newsletter_subscription_success_email_template' => 'newsletter_subscription_success_email_template',
-    'newsletter_subscription_un_email_template' => 'newsletter_subscription_un_email_template',
+    'newsletter_subscription_confirm_email_template' => array() ,
+    'newsletter_subscription_success_email_template' => array() ,
+    'newsletter_subscription_un_email_template' => array() ,
     'sales_email_creditmemo_template' => array(
-        'order' => 1
+        'order' => 1,
     ) ,
     'sales_email_order_comment_template' => array(
-        'order' => 1
+        'order' => 1,
     ) ,
     'sales_email_order_template' => array(
-        'order' => 1
+        'order' => 1,
     ) ,
     'sales_email_shipment_template' => array(
-        'order' => 1
+        'order' => 1,
     ) ,
-    'sendfriend_email_template' => 'sendfriend_email_template',
     'wishlist_email_email_template' => array(
-        'customer' => 1
+        'customer' => 1,
     ) ,
 );
 
 /* ----------------------------------------------------------
   Load Magento
 ---------------------------------------------------------- */
+
+@session_start();
 
 /* Search magento file
  -------------------------- */
@@ -76,6 +77,22 @@ if (!$_fileExists) {
  -------------------------- */
 
 Mage::app();
+
+/* Set template names
+ -------------------------- */
+
+foreach (Mage_Core_Model_Email_Template::getDefaultTemplatesAsOptionsArray() as $_option):
+    if (isset($templates[$_option['value']])) {
+        $templates[$_option['value']]['name'] = $_option['label'];
+    }
+endforeach;
+
+$mid = array();
+foreach ($templates as $key => $row) {
+    $mid[$key] = $row['name'];
+}
+
+array_multisort($mid, SORT_ASC, $templates);
 
 /* Load stores
  -------------------------- */
@@ -103,7 +120,7 @@ if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $templates
     echo '<meta charset="UTF-8" /><title>Mail preview</title>';
     echo '</head><body><h1>Mail preview</h1>';
 
-    if(isset($_GET['success'])){
+    if (isset($_GET['success'])) {
         echo '<p style="color:green">Mail has been successfully sent !</p>';
     }
 
@@ -111,14 +128,31 @@ if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $templates
     echo '<p><label for="template">Template :</label><br />';
     echo '<select id="template" name="template">';
     foreach ($templates as $tpl_id => $template) {
-        echo '<option value="' . $tpl_id . '"">' . $tpl_id . '</a></li>';
+        $tplName = $tpl_id;
+        if (isset($template['name'])) {
+            $tplName = $template['name'];
+        }
+        echo '<option value="' . $tpl_id . '"">' . $tplName . '</a></li>';
     }
     echo '</select></p>';
     echo '<p><label for="store">Store :</label><br />';
     echo '<select id="store" name="store">';
+    $i = 0;
+    $_lastGroup = '';
     foreach ($_stores as $storeId => $store) {
-        echo '<option value="' . $storeId . '"">' . $store->getName() . '</a></li>';
+        $_groupName = $store->getGroup()->getName();
+        if ($_groupName != $_lastGroup) {
+            if ($i > 0) {
+                echo '</optgroup>';
+            }
+            echo '<optgroup label="' . $_groupName . '">';
+            $_lastGroup = $_groupName;
+        }
+        $_isCurrent = isset($_SESSION['integento__emailtester__store']) && $_SESSION['integento__emailtester__store'] == $storeId;
+        echo '<option ' . ($_isCurrent ? 'selected="selected"' : '') . ' value="' . $storeId . '"">' . $store->getName() . '</a></li>';
+        $i++;
     }
+    echo '</optgroup>';
     echo '</select></p>';
     echo '<p id="box-email"><label for="email">Email</label><br />';
     echo '<input type="email" id="email" name="email" value="" /></p>';
@@ -136,6 +170,8 @@ if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $templates
 if (isset($_GET['store']) && array_key_exists($_GET['store'], $_stores)) {
     $_store = $_GET['store'];
 }
+
+$_SESSION['integento__emailtester__store'] = $_store;
 
 $_locale = Mage::getStoreConfig('general/locale/code', $_store);
 Mage::getSingleton('core/translate')->setLocale($_locale)->init('frontend', true);
@@ -240,16 +276,21 @@ if ($tpl == 'wishlist_email_email_template') {
   Display template
 ---------------------------------------------------------- */
 
+$mailTemplate = Mage::getModel('core/email_template')->load(3)->loadDefault($tpl);
+$mailTemplate->setDesignConfig(array(
+    'area' => 'frontend',
+    'store' => $_store
+));
+
 if (isset($_GET['email'], $_GET['send']) && filter_var($_GET['email'], FILTER_VALIDATE_EMAIL) !== false) {
-    $email_template = Mage::getModel('core/email_template')->loadDefault($tpl);
-    $email_template->setSenderName(Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME));
-    $email_template->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'));
-    $email_template->send($_GET['email'], 'Email Tester', $datas);
+    $mailTemplate->setSenderName(Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME));
+    $mailTemplate->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'));
+    $mailTemplate->send($_GET['email'], 'Email Tester', $datas);
     header("Location: index.php?success=1");
     return;
 }
 else {
     header('Content-Type: text/html; charset=utf-8');
-    echo Mage::getModel('core/email_template')->load(3)->loadDefault($tpl)->getProcessedTemplate($datas);
+    echo $mailTemplate->getProcessedTemplate($datas);
 }
 
