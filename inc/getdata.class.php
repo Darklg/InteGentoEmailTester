@@ -11,6 +11,7 @@ class inteGentoEmailTester {
                 'code' => 'foo'
             )) ,
             'customerName' => 'Jean-Michel Lorem',
+            'customerEmail' => 'jeanmichel@magento.com',
             'name' => 'Jean-Michel Lorem',
             'product_url' => 'https://github.com/Darklg',
             'product_name' => 'Barre de faire',

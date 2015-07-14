@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.9
+ * Email tester v 0.11
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_9';
+$testerVersion = '0_11';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 $templates = array(
@@ -19,6 +19,9 @@ $templates = array(
     'catalog_productalert_email_stock_template' => array(
         'alertGrid' => 1,
         'customer' => 1,
+    ) ,
+    'checkout_payment_failed_template' => array(
+        'order' => 1,
     ) ,
     'contacts_email_email_template' => array() ,
     'customer_create_account_email_template' => array(
@@ -190,6 +193,8 @@ if (isset($templates[$tpl]['order'])) {
         $_datas = unserialize($data);
         $datas['order'] = $_datas['order'];
         $datas['billing'] = $_datas['billing'];
+        $datas['billingAddress'] = $_datas['billingAddress'];
+        $datas['shippingAddress'] = $_datas['shippingAddress'];
         $datas['payment_html'] = $_datas['payment_html'];
     }
     else {
@@ -203,6 +208,8 @@ if (isset($templates[$tpl]['order'])) {
 
         $datas['order'] = $order;
         $datas['billing'] = $order->getBillingAddress();
+        $datas['billingAddress'] = $order->getBillingAddress();
+        $datas['shippingAddress'] = $order->getShippingAddress();
         $datas['payment_html'] = $paymentBlock->toHtml();
         Mage::app()->getCache()->save(serialize($datas) , $cacheId);
     }
@@ -220,6 +227,20 @@ if ($tpl == 'sales_email_shipment_template' && is_object($datas['order'])) {
 
 if ($tpl == 'sales_email_creditmemo_template' && is_object($datas['order'])) {
     $datas['creditmemo'] = $inteGentoEmailTester->getCreditMemo();
+}
+
+/* Payment failed
+ -------------------------- */
+
+if ($tpl == 'checkout_payment_failed_template' && is_object($datas['order'])) {
+    $datas['reason'] = 'oops';
+    $datas['checkoutType'] = 'onepage';
+    $datas['dateAndTime'] = Mage::app()->getLocale()->date();
+    $datas['customer'] = $datas['customerName'];
+    $datas['total'] = '€ 100';
+    $datas['shippingMethod'] = 'ups_worldwide_example';
+    $datas['paymentMethod'] = 'visa_worldwide_example';
+    $datas['items'] = 'Apple Watch x 5  €10000<br />Apple Watch x 10  €20000';
 }
 
 /* Contact template
