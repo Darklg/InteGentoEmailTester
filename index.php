@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.11
+ * Email tester v 0.12
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_11';
+$testerVersion = '0_12';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 $templates = array(
@@ -33,8 +33,13 @@ $templates = array(
     'newsletter_subscription_confirm_email_template' => array() ,
     'newsletter_subscription_success_email_template' => array() ,
     'newsletter_subscription_un_email_template' => array() ,
+    'sales_email_creditmemo_comment_template' => array(
+        'order' => 1,
+        'creditmemo' => 1,
+    ) ,
     'sales_email_creditmemo_template' => array(
         'order' => 1,
+        'creditmemo' => 1,
     ) ,
     'sales_email_order_comment_template' => array(
         'order' => 1,
@@ -42,8 +47,21 @@ $templates = array(
     'sales_email_order_template' => array(
         'order' => 1,
     ) ,
+    'sales_email_shipment_comment_template' => array(
+        'order' => 1,
+        'shipment' => 1,
+    ) ,
     'sales_email_shipment_template' => array(
         'order' => 1,
+        'shipment' => 1,
+    ) ,
+    'sales_email_invoice_comment_template' => array(
+        'order' => 1,
+        'invoice' => 1,
+    ) ,
+    'sales_email_invoice_template' => array(
+        'order' => 1,
+        'invoice' => 1,
     ) ,
     'wishlist_email_email_template' => array(
         'customer' => 1,
@@ -218,14 +236,20 @@ if (isset($templates[$tpl]['order'])) {
 /* Shipment
  -------------------------- */
 
-if ($tpl == 'sales_email_shipment_template' && is_object($datas['order'])) {
-    $datas['shipment'] = $inteGentoEmailTester->getShipment();
+if (isset($templates[$tpl]['shipment'])) {
+    $datas['shipment'] = $inteGentoEmailTester->getInvoice();
+}
+
+/* Invoice
+ -------------------------- */
+if (isset($templates[$tpl]['invoice'])) {
+    $datas['invoice'] = $inteGentoEmailTester->getInvoice();
 }
 
 /* Credit memo
  -------------------------- */
 
-if ($tpl == 'sales_email_creditmemo_template' && is_object($datas['order'])) {
+if (isset($templates[$tpl]['creditmemo'])) {
     $datas['creditmemo'] = $inteGentoEmailTester->getCreditMemo();
 }
 

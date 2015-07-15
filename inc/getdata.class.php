@@ -28,6 +28,14 @@ class inteGentoEmailTester {
         return $shipment;
     }
 
+    function getInvoice() {
+        $invoice = new Varien_Object();
+        $invoice->setData(array(
+            'increment_id' => '100000022'
+        ));
+        return $invoice;
+    }
+
     function getCreditMemo() {
         $creditmemo = new Varien_Object();
         $creditmemo->setData(array(
