@@ -1,0 +1,52 @@
+@charset "UTF-8";
+
+/* ----------------------------------------------------------
+  Layout
+---------------------------------------------------------- */
+
+* {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html,
+body,
+body > * {
+    z-index: 1;
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+}
+
+body > * {
+    float: left;
+    width: 50%;
+    padding: 10px;
+    overflow: auto;
+}
+
+iframe {
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: auto;
+}
+
+@media(max-width:1024px) {
+    html,
+    body,
+    body > * {
+        float: none;
+        width: auto;
+        height: auto;
+        overflow: auto;
+    }
+
+    .preview,
+    iframe {
+        min-height: 400px;
+    }
+}

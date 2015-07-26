@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.12
+ * Email tester v 0.13
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_12';
+$testerVersion = '0_13';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 $templates = array(
@@ -99,10 +99,12 @@ if (!$_fileExists) {
 
 Mage::app();
 
+$mailModel = Mage::getModel('core/email_template');
+
 /* Set template names
  -------------------------- */
 
-foreach (Mage_Core_Model_Email_Template::getDefaultTemplatesAsOptionsArray() as $_option):
+foreach ($mailModel->getDefaultTemplatesAsOptionsArray() as $_option):
     if (isset($templates[$_option['value']])) {
         $templates[$_option['value']]['name'] = $_option['label'];
     }
@@ -136,51 +138,7 @@ foreach ($websites as $website) {
 
 $tpl = $_GET['template'];
 if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $templates)) {
-
-    echo '<!DOCTYPE HTML><html lang="en_EN"><head>';
-    echo '<meta charset="UTF-8" /><title>Mail preview</title>';
-    echo '</head><body><h1>Mail preview</h1>';
-
-    if (isset($_GET['success'])) {
-        echo '<p style="color:green">Mail has been successfully sent !</p>';
-    }
-
-    echo '<form action="" method="get">';
-    echo '<p><label for="template">Template :</label><br />';
-    echo '<select id="template" name="template">';
-    foreach ($templates as $tpl_id => $template) {
-        $tplName = $tpl_id;
-        if (isset($template['name'])) {
-            $tplName = $template['name'];
-        }
-        echo '<option value="' . $tpl_id . '"">' . $tplName . '</a></li>';
-    }
-    echo '</select></p>';
-    echo '<p><label for="store">Store :</label><br />';
-    echo '<select id="store" name="store">';
-    $i = 0;
-    $_lastGroup = '';
-    foreach ($_stores as $storeId => $store) {
-        $_groupName = $store->getGroup()->getName();
-        if ($_groupName != $_lastGroup) {
-            if ($i > 0) {
-                echo '</optgroup>';
-            }
-            echo '<optgroup label="' . $_groupName . '">';
-            $_lastGroup = $_groupName;
-        }
-        $_isCurrent = isset($_SESSION['integento__emailtester__store']) && $_SESSION['integento__emailtester__store'] == $storeId;
-        echo '<option ' . ($_isCurrent ? 'selected="selected"' : '') . ' value="' . $storeId . '"">' . $store->getName() . '</a></li>';
-        $i++;
-    }
-    echo '</optgroup>';
-    echo '</select></p>';
-    echo '<p id="box-email"><label for="email">Email</label><br />';
-    echo '<input type="email" id="email" name="email" value="" /></p>';
-    echo '<button type="submit" name="submit">Preview</button>';
-    echo '<button type="submit" name="send" autocomplete="email">Send by email</button>';
-    echo '</form>';
-    echo '</body></html>';
+    include 'inc/default.php';
     die;
 }
 
@@ -321,7 +279,7 @@ if ($tpl == 'wishlist_email_email_template') {
   Display template
 ---------------------------------------------------------- */
 
-$mailTemplate = Mage::getModel('core/email_template')->load(3)->loadDefault($tpl);
+$mailTemplate = $mailModel->load(3)->loadDefault($tpl);
 $mailTemplate->setDesignConfig(array(
     'area' => 'frontend',
     'store' => $_store
