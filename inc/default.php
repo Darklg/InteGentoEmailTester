@@ -11,10 +11,17 @@
 
 <?php
 if (isset($_GET['success'])) {
-    echo '<p style="color:green">Mail has been successfully sent !</p>';
+    echo '<p style="color:green">';
+    if ($_GET['success'] == '1') {
+        echo 'Mail has been successfully sent !';
+    }
+    if ($_GET['success'] == '2') {
+        echo 'Template has been successfully saved !';
+    }
+    echo '</p>';
 }
 
-echo '<form target="preview" action="" method="get">';
+echo '<form id="integento-form" action="" method="get">';
 echo '<p><label for="template">Template :</label><br />';
 echo '<select id="template" name="template">';
 foreach ($templates as $tpl_id => $template) {
@@ -46,8 +53,9 @@ echo '</optgroup>';
 echo '</select></p>';
 echo '<p id="box-email"><label for="email">Email</label><br />';
 echo '<input type="email" id="email" name="email" value="" /></p>';
-echo '<button type="submit" name="submit">Preview</button>';
-echo '<button type="submit" name="send" autocomplete="email">Send by email</button>';
+echo '<button type="submit" onclick="document.getElementById(\'integento-form\').target=\'preview\';" name="submit">Preview</button>';
+echo '<button type="submit" onclick="document.getElementById(\'integento-form\').target=\'_self\';return confirm(\'Do you really want to save this email into the admin templates list ?\');" name="save_admin_tpl">Save as Template</button>';
+echo '<button type="submit" onclick="document.getElementById(\'integento-form\').target=\'_self\';" name="send" autocomplete="email">Send by email</button>';
 echo '</form>';
 
 ?>

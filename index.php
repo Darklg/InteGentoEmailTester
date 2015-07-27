@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.13
+ * Email tester v 0.14
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_13';
+$testerVersion = '0_14';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 $templates = array(
@@ -244,7 +244,7 @@ if (isset($templates[$tpl]['customer'])) {
         $datas['customerName'] = $_datas['customer']->getName();
     }
     else {
-        $collection = Mage::getModel('customer/customer')->getCollection()->addAttributeToSelect('*')->addAttributeToSort('entity_id', 'desc')->setPageSize(1);
+        $collection = Mage::getModel('customer/customer')->getCollection()->addAttributeToxfxf('*')->addAttributeToSort('entity_id', 'desc')->setPageSize(1);
         $datas['customer'] = $collection->getFirstItem();
         $datas['customer']->setData('name', '****');
         $datas['customer']->setData('password', '****');
@@ -290,6 +290,34 @@ if (isset($_GET['email'], $_GET['send']) && filter_var($_GET['email'], FILTER_VA
     $mailTemplate->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'));
     $mailTemplate->send($_GET['email'], 'Email Tester', $datas);
     header("Location: index.php?success=1");
+    return;
+}
+else if (isset($_GET['save_admin_tpl'])) {
+    $_core = Mage::getSingleton('core/resource');
+    $_write = $_core->getConnection('core_write');
+    $tpl = $mailTemplate->getData();
+    $tpl['template_code'] = '[' . $datas['store']->getName() . '] ';
+    if ($mailTemplate->getData('template_code')) {
+        $tpl['template_code'].= $mailTemplate->getData('template_code');
+    }
+    else {
+        $tpl['template_code'].= $mailTemplate->getData('template_subject');
+    }
+
+    $tpl['template_text'] = $mailTemplate->getData('template_text');
+    $tpl['template_type'] = $mailTemplate->getData('template_type');
+    $tpl['template_subject'] = $mailTemplate->getData('template_subject');
+
+    try {
+        $_write->insert($_core->getTableName('core_email_template') , $tpl);
+    }
+    catch(Exception $e) {
+        echo '<pre>';
+        var_dump($e->getMessage());
+        echo '</pre>';
+        die;
+    }
+    header("Location: index.php?success=2");
     return;
 }
 else {
