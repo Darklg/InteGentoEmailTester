@@ -50,3 +50,29 @@ iframe {
         min-height: 400px;
     }
 }
+
+/* ----------------------------------------------------------
+  Messages
+---------------------------------------------------------- */
+
+#messages {
+    margin-bottom: 20px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.message-success,
+.message-error {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid;
+}
+
+.message-success {
+    color: #090;
+}
+
+.message-error {
+    color: #900;
+}

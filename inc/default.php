@@ -9,19 +9,13 @@
 <div class="side">
 <h1>Mail preview</h1>
 
-<?php
-if (isset($_GET['success'])) {
-    echo '<p style="color:green">';
-    if ($_GET['success'] == '1') {
-        echo 'Mail has been successfully sent !';
-    }
-    if ($_GET['success'] == '2') {
-        echo 'Template has been successfully saved !';
-    }
-    echo '</p>';
-}
+<?php echo $inteGentoEmailTester->displayMessages(); ?>
 
-echo '<form id="integento-form" action="" method="get">';
+<form id="integento-form" action="" method="get">
+
+<?php
+
+/* Templates */
 echo '<p><label for="template">Template :</label><br />';
 echo '<select id="template" name="template">';
 foreach ($templates as $tpl_id => $template) {
@@ -32,6 +26,8 @@ foreach ($templates as $tpl_id => $template) {
     echo '<option value="' . $tpl_id . '"">' . $tplName . '</a></li>';
 }
 echo '</select></p>';
+
+/* Stores */
 echo '<p><label for="store">Store :</label><br />';
 echo '<select id="store" name="store">';
 $i = 0;
@@ -51,16 +47,15 @@ foreach ($_stores as $storeId => $store) {
 }
 echo '</optgroup>';
 echo '</select></p>';
-echo '<p id="box-email"><label for="email">Email</label><br />';
-echo '<input type="email" id="email" name="email" value="" /></p>';
-echo '<button type="submit" onclick="document.getElementById(\'integento-form\').target=\'preview\';" name="submit">Preview</button>';
-echo '<button type="submit" onclick="document.getElementById(\'integento-form\').target=\'_self\';return confirm(\'Do you really want to save this email into the admin templates list ?\');" name="save_admin_tpl">Save as Template</button>';
-echo '<button type="submit" onclick="document.getElementById(\'integento-form\').target=\'_self\';" name="send" autocomplete="email">Send by email</button>';
-echo '</form>';
+
+/* Email */
+echo '<p id="box-email"><label for="email">Email</label><br /><input type="email" id="email" name="email" value="" /></p>';
 
 ?>
+<button type="submit" onclick="document.getElementById('integento-form').target='preview';" name="submit">Preview</button>
+<button type="submit" onclick="document.getElementById('integento-form').target='_self';return confirm('Do you really want to save this email into the admin templates list ?');" name="save_admin_tpl">Save as Template</button>
+<button type="submit" onclick="document.getElementById('integento-form').target='_self';" name="send" autocomplete="email">Send by email</button>
+</form>
 </div>
-<div class="preview">
-<iframe name="preview" frameborder="0"></iframe>
-</div>
+<div class="preview"><iframe name="preview" frameborder="0"></iframe></div>
 </body></html>

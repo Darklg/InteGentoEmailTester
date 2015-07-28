@@ -1,72 +1,15 @@
 <?php
 
 /**
- * Email tester v 0.14
+ * Email tester v 0.15
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_14';
+$testerVersion = '0_15';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
-
-$templates = array(
-    'catalog_productalert_email_price_template' => array(
-        'alertGrid' => 1,
-        'customer' => 1,
-    ) ,
-    'catalog_productalert_email_stock_template' => array(
-        'alertGrid' => 1,
-        'customer' => 1,
-    ) ,
-    'checkout_payment_failed_template' => array(
-        'order' => 1,
-    ) ,
-    'contacts_email_email_template' => array() ,
-    'customer_create_account_email_template' => array(
-        'customer' => 1,
-    ) ,
-    'customer_password_forgot_email_template' => array(
-        'customer' => 1,
-    ) ,
-    'newsletter_subscription_confirm_email_template' => array() ,
-    'newsletter_subscription_success_email_template' => array() ,
-    'newsletter_subscription_un_email_template' => array() ,
-    'sales_email_creditmemo_comment_template' => array(
-        'order' => 1,
-        'creditmemo' => 1,
-    ) ,
-    'sales_email_creditmemo_template' => array(
-        'order' => 1,
-        'creditmemo' => 1,
-    ) ,
-    'sales_email_order_comment_template' => array(
-        'order' => 1,
-    ) ,
-    'sales_email_order_template' => array(
-        'order' => 1,
-    ) ,
-    'sales_email_shipment_comment_template' => array(
-        'order' => 1,
-        'shipment' => 1,
-    ) ,
-    'sales_email_shipment_template' => array(
-        'order' => 1,
-        'shipment' => 1,
-    ) ,
-    'sales_email_invoice_comment_template' => array(
-        'order' => 1,
-        'invoice' => 1,
-    ) ,
-    'sales_email_invoice_template' => array(
-        'order' => 1,
-        'invoice' => 1,
-    ) ,
-    'wishlist_email_email_template' => array(
-        'customer' => 1,
-    ) ,
-);
 
 /* ----------------------------------------------------------
   Load Magento
@@ -76,8 +19,6 @@ $templates = array(
 
 /* Search magento file
  -------------------------- */
-
-require_once ('inc/getdata.class.php');
 
 $_mageAppName = 'app/Mage.php';
 $_fileExists = false;
@@ -99,38 +40,16 @@ if (!$_fileExists) {
 
 Mage::app();
 
-$mailModel = Mage::getModel('core/email_template');
-
-/* Set template names
+/* Set system
  -------------------------- */
 
-foreach ($mailModel->getDefaultTemplatesAsOptionsArray() as $_option):
-    if (isset($templates[$_option['value']])) {
-        $templates[$_option['value']]['name'] = $_option['label'];
-    }
-endforeach;
+require_once ('inc/getdata.class.php');
 
-$mid = array();
-foreach ($templates as $key => $row) {
-    $mid[$key] = $row['name'];
-}
-
-array_multisort($mid, SORT_ASC, $templates);
-
-/* Load stores
+/* Get values
  -------------------------- */
 
-$_stores = array();
-$websites = Mage::app()->getWebsites();
-foreach ($websites as $website) {
-    $groups = $website->getGroups();
-    foreach ($groups as $group) {
-        $stores = $group->getStores();
-        foreach ($stores as $store) {
-            $_stores[$store->getId() ] = $store;
-        }
-    }
-}
+$templates = $inteGentoEmailTester->getTemplates();
+$_stores = $inteGentoEmailTester->getStores();
 
 /* ----------------------------------------------------------
   Default page
@@ -154,10 +73,7 @@ $_SESSION['integento__emailtester__store'] = $_store;
 
 $_locale = Mage::getStoreConfig('general/locale/code', $_store);
 Mage::getSingleton('core/translate')->setLocale($_locale)->init('frontend', true);
-
-$datas = $inteGentoEmailTester->getDefaultData();
-
-$datas['store'] = $_stores[$_store];
+$datas = $inteGentoEmailTester->getDefaultData($_store);
 
 /* New order template
  -------------------------- */
@@ -244,7 +160,7 @@ if (isset($templates[$tpl]['customer'])) {
         $datas['customerName'] = $_datas['customer']->getName();
     }
     else {
-        $collection = Mage::getModel('customer/customer')->getCollection()->addAttributeToxfxf('*')->addAttributeToSort('entity_id', 'desc')->setPageSize(1);
+        $collection = Mage::getModel('customer/customer')->getCollection()->addAttributeToSort('entity_id', 'desc')->setPageSize(1);
         $datas['customer'] = $collection->getFirstItem();
         $datas['customer']->setData('name', '****');
         $datas['customer']->setData('password', '****');
@@ -276,52 +192,8 @@ if ($tpl == 'wishlist_email_email_template') {
 }
 
 /* ----------------------------------------------------------
-  Display template
+  Use template
 ---------------------------------------------------------- */
 
-$mailTemplate = $mailModel->load(3)->loadDefault($tpl);
-$mailTemplate->setDesignConfig(array(
-    'area' => 'frontend',
-    'store' => $_store
-));
-
-if (isset($_GET['email'], $_GET['send']) && filter_var($_GET['email'], FILTER_VALIDATE_EMAIL) !== false) {
-    $mailTemplate->setSenderName(Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME));
-    $mailTemplate->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'));
-    $mailTemplate->send($_GET['email'], 'Email Tester', $datas);
-    header("Location: index.php?success=1");
-    return;
-}
-else if (isset($_GET['save_admin_tpl'])) {
-    $_core = Mage::getSingleton('core/resource');
-    $_write = $_core->getConnection('core_write');
-    $tpl = $mailTemplate->getData();
-    $tpl['template_code'] = '[' . $datas['store']->getName() . '] ';
-    if ($mailTemplate->getData('template_code')) {
-        $tpl['template_code'].= $mailTemplate->getData('template_code');
-    }
-    else {
-        $tpl['template_code'].= $mailTemplate->getData('template_subject');
-    }
-
-    $tpl['template_text'] = $mailTemplate->getData('template_text');
-    $tpl['template_type'] = $mailTemplate->getData('template_type');
-    $tpl['template_subject'] = $mailTemplate->getData('template_subject');
-
-    try {
-        $_write->insert($_core->getTableName('core_email_template') , $tpl);
-    }
-    catch(Exception $e) {
-        echo '<pre>';
-        var_dump($e->getMessage());
-        echo '</pre>';
-        die;
-    }
-    header("Location: index.php?success=2");
-    return;
-}
-else {
-    header('Content-Type: text/html; charset=utf-8');
-    echo $mailTemplate->getProcessedTemplate($datas);
-}
+$inteGentoEmailTester->setMailTemplateAndUseDatas($tpl, $_store, $datas);
 
