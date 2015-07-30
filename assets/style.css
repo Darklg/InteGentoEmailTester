@@ -76,3 +76,38 @@ iframe {
 .message-error {
     color: #900;
 }
+
+/* ----------------------------------------------------------
+  Form items
+---------------------------------------------------------- */
+
+select,
+input[type=email],
+button {
+    font-size: 13px;
+}
+
+select,
+input[type=email] {
+    display: block;
+    width: 15em;
+    height: 2em;
+    padding: 1em 0.5em;
+    line-height: 2em;
+}
+
+button {
+    height: 2em;
+    border: 1px solid #CCC;
+    border-radius: 3px;
+    background: #FFFFFF no-repeat 0 0;
+    background-color: #ccc;
+    background-image: -webkit-linear-gradient(top,rgba(255,255,255,.5), transparent);
+    background-image: -moz-linear-gradient(top,rgba(255,255,255,.5), transparent);
+    background-image: linear-gradient(top,rgba(255,255,255,.5), transparent);
+    cursor: pointer;
+}
+
+button.main {
+    background-color: #9C9;
+}

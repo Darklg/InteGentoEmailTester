@@ -5,10 +5,16 @@ class inteGentoEmailTester {
         'catalog_productalert_email_price_template' => array(
             'alertGrid' => 1,
             'customer' => 1,
+            'templates' => array(
+                'app/locale/en_EN/template/email/product_price_alert.html',
+            )
         ) ,
         'catalog_productalert_email_stock_template' => array(
             'alertGrid' => 1,
             'customer' => 1,
+            'templates' => array(
+                'app/locale/en_EN/template/email/product_stock_alert.html',
+            )
         ) ,
         'checkout_payment_failed_template' => array(
             'order' => 1,
@@ -299,7 +305,11 @@ class inteGentoEmailTester {
             'store' => $store
         ));
         if (isset($_GET['email'], $_GET['send']) && filter_var($_GET['email'], FILTER_VALIDATE_EMAIL) !== false) {
+            $_SESSION['integento__emailtester__email'] = $_GET['email'];
             $this->sendTemplateByMail($_GET['email'], $datas);
+        }
+        else if (isset($_GET['get_template_details'])) {
+            $this->getTemplateDetails($tpl, $datas);
         }
         else if (isset($_GET['save_admin_tpl'])) {
             $this->saveTemplateInAdmin($tpl, $datas);
@@ -318,6 +328,21 @@ class inteGentoEmailTester {
         return;
     }
 
+    function getTemplateDetails($tpl, $datas) {
+        echo '<!DOCTYPE HTML><html lang="en-EN"><head><meta charset="UTF-8" /><title>' . $tpl . '</title></head><body>';
+        echo '<h1>' . $tpl . '</h1>';
+        if (isset($this->templates[$tpl]['templates'])) {
+            echo '<h2>Templates</h2>';
+            echo '<ul>';
+            foreach ($this->templates[$tpl]['templates'] as $value) {
+                echo '<li>' . $value . '</li>';
+            }
+            echo '</ul>';
+        }
+
+        echo '</body></html>';
+        return;
+    }
     function saveTemplateInAdmin($tpl, $datas) {
 
         $_core = Mage::getSingleton('core/resource');

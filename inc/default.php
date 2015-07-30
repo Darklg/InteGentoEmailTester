@@ -49,7 +49,7 @@ echo '</optgroup>';
 echo '</select></p>';
 
 /* Email */
-echo '<p id="box-email"><label for="email">Email</label><br /><input type="email" id="email" name="email" value="" /></p>';
+echo '<p id="box-email"><label for="email">Email</label><br /><input type="email" id="email" name="email" value="'.(isset($_SESSION['integento__emailtester__email']) ? $_SESSION['integento__emailtester__email'] : '').'" /></p>';
 
 ?>
 <button type="submit" onclick="document.getElementById('integento-form').target='preview';" name="submit">Preview</button>
