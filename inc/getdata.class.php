@@ -2,6 +2,18 @@
 class inteGentoEmailTester {
 
     private $templates = array(
+        'aw_hdu3_to_customer_new_ticket_email' => array(
+            'aw_hdu3' => 1
+        ) ,
+        'aw_hdu3_to_customer_new_ticket_by_admin_email' => array(
+            'aw_hdu3' => 1
+        ) ,
+        'aw_hdu3_to_customer_new_reply_email' => array(
+            'aw_hdu3' => 1
+        ) ,
+        'aw_hdu3_to_customer_ticket_changed' => array(
+            'aw_hdu3' => 1
+        ) ,
         'catalog_productalert_email_price_template' => array(
             'alertGrid' => 1,
             'customer' => 1,

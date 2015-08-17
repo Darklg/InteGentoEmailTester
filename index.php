@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.15.1
+ * Email tester v 0.16
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_15_1';
+$testerVersion = '0_16';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 /* ----------------------------------------------------------
@@ -189,6 +189,20 @@ if ($tpl == 'newsletter_subscription_confirm_email_template') {
 if ($tpl == 'wishlist_email_email_template') {
     $datas['items'] = $inteGentoEmailTester->getWishlistItems();
     $datas['message'] = 'Please buy this';
+}
+
+/* AW Help Desk 3
+-------------------------- */
+
+if (isset($templates[$tpl]['aw_hdu3'])) {
+    $datas['is_agent_changed'] = true;
+    $datas['is_department_changed'] = true;
+    $datas['is_status_changed'] = true;
+    $datas['agent_name'] = 'Jean-Michel Support';
+    $datas['department_name'] = 'Main Department';
+    $datas['ticket_status'] = 'Waiting for reply';
+    $datas['ticket_uid'] = 'OBO-46271';
+    $datas['ticket_subject'] = 'The world needs dreamers and the world needs doers.';
 }
 
 /* ----------------------------------------------------------
