@@ -52,10 +52,11 @@ echo '</select></p>';
 echo '<p id="box-email"><label for="email">Email</label><br /><input type="email" id="email" name="email" value="'.(isset($_SESSION['integento__emailtester__email']) ? $_SESSION['integento__emailtester__email'] : '').'" /></p>';
 
 ?>
-<button type="submit" onclick="document.getElementById('integento-form').target='preview';" name="submit">Preview</button>
-<button type="submit" onclick="document.getElementById('integento-form').target='_self';return confirm('Do you really want to save this email into the admin templates list ?');" name="save_admin_tpl">Save as Template</button>
-<button type="submit" onclick="document.getElementById('integento-form').target='_self';" name="send" autocomplete="email">Send by email</button>
+<button type="submit" id="button_preview" name="submit">Preview</button>
+<button type="submit" id="button_save" name="save_admin_tpl">Save as Template</button>
+<button type="submit" id="button_send" name="send">Send by email</button>
 </form>
 </div>
 <div class="preview"><iframe name="preview" frameborder="0"></iframe></div>
+<script src="assets/script.js"></script>
 </body></html>

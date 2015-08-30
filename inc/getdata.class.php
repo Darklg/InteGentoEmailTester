@@ -41,6 +41,7 @@ class inteGentoEmailTester {
         'newsletter_subscription_confirm_email_template' => array() ,
         'newsletter_subscription_success_email_template' => array() ,
         'newsletter_subscription_un_email_template' => array() ,
+        'sendfriend_email_template' => array() ,
         'sales_email_creditmemo_comment_template' => array(
             'order' => 1,
             'creditmemo' => 1,
@@ -204,6 +205,8 @@ class inteGentoEmailTester {
             'customerName' => 'Jean-Michel Lorem',
             'customerEmail' => $this->storeEmail,
             'name' => 'Jean-Michel Lorem',
+            'customer_first_name' => 'Jean-Pierre',
+            'sender_name' => 'Jean-Pierre Ipsum',
             'product_url' => 'https://github.com/Darklg',
             'product_name' => 'Barre de faire',
             'product_image' => 'http://placehold.it/75x75',
