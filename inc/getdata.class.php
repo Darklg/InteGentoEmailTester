@@ -147,6 +147,15 @@ class inteGentoEmailTester {
 
     function setTemplates($templates) {
 
+        $modules = Mage::getConfig()->getNode('modules')->children();
+        $this->modulesArray = (array)$modules;
+
+        foreach ($templates as $tpl_id => $tpl) {
+            if (!isset($this->modulesArray['AW_Helpdesk3']) && isset($tpl['aw_hdu3'])) {
+                unset($templates[$tpl_id]);
+            }
+        }
+
         foreach (Mage::getModel('core/email_template')->getDefaultTemplatesAsOptionsArray() as $_option):
             if (isset($templates[$_option['value']])) {
                 $templates[$_option['value']]['name'] = $_option['label'];
