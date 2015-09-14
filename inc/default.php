@@ -53,6 +53,7 @@ echo '<p id="box-email"><label for="email">Email</label><br /><input type="email
 
 ?>
 <button type="submit" id="button_preview" name="submit">Preview</button>
+<button type="submit" id="button_details" name="get_template_details">Details</button>
 <button type="submit" id="button_save" name="save_admin_tpl">Save as Template</button>
 <button type="submit" id="button_send" name="send">Send by email</button>
 </form>

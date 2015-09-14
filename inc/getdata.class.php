@@ -17,16 +17,10 @@ class inteGentoEmailTester {
         'catalog_productalert_email_price_template' => array(
             'alertGrid' => 1,
             'customer' => 1,
-            'templates' => array(
-                'app/locale/en_EN/template/email/product_price_alert.html',
-            )
         ) ,
         'catalog_productalert_email_stock_template' => array(
             'alertGrid' => 1,
             'customer' => 1,
-            'templates' => array(
-                'app/locale/en_EN/template/email/product_stock_alert.html',
-            )
         ) ,
         'checkout_payment_failed_template' => array(
             'order' => 1,
@@ -156,9 +150,21 @@ class inteGentoEmailTester {
             }
         }
 
-        foreach (Mage::getModel('core/email_template')->getDefaultTemplatesAsOptionsArray() as $_option):
-            if (isset($templates[$_option['value']])) {
-                $templates[$_option['value']]['name'] = $_option['label'];
+        $base_tpl = Mage::getConfig()->getNode('global/template/email')->asArray();
+        $default_templates = Mage::getModel('core/email_template')->getDefaultTemplatesAsOptionsArray();
+        foreach ($default_templates as $_option):
+            $val = $_option['value'];
+            if (empty($val)) {
+                continue;
+            }
+            if (isset($templates[$val])) {
+                $templates[$val]['name'] = $_option['label'];
+                if (!isset($templates[$val]['templates'])) {
+                    $templates[$val]['templates'] = array();
+                }
+                if (isset($base_tpl[$val]['file'])) {
+                    $templates[$val]['templates'][] = $base_tpl[$val]['file'];
+                }
             }
         endforeach;
 
@@ -201,8 +207,8 @@ class inteGentoEmailTester {
       Get datas
     ---------------------------------------------------------- */
 
-    function getDefaultData($store) {
-        return array(
+    function getDefaultData($store, $tpl) {
+        $datas = array(
             'store' => $this->stores[$store],
             'salable' => 'yes',
             'addAllLink' => Mage::getUrl('*/shared/allcart', array(
@@ -221,6 +227,139 @@ class inteGentoEmailTester {
             'product_image' => 'http://placehold.it/75x75',
             'message' => 'The world needs dreamers and the world needs doers. But above all, the world needs dreamers who do — Sarah Ban Breathnach. Everyone who has ever taken a shower has had an idea. It’s the person who gets out of the shower, dries off, and does something about it that makes a difference — Nolan Bushnell. ',
         );
+
+        $template = $this->templates[$tpl];
+
+        /* New order template
+         -------------------------- */
+
+        if (isset($template['order'])) {
+
+            $cacheId = $cachePrefixKey . 'sales_email_order_template';
+            if (false !== ($data = Mage::app()->getCache()->load($cacheId))) {
+                $_datas = unserialize($data);
+                $datas['order'] = $_datas['order'];
+                $datas['billing'] = $_datas['billing'];
+                $datas['billingAddress'] = $_datas['billingAddress'];
+                $datas['shippingAddress'] = $_datas['shippingAddress'];
+                $datas['payment_html'] = $_datas['payment_html'];
+            }
+            else {
+
+                /* Load latest order */
+                $orders = Mage::getModel('sales/order')->getCollection()->setOrder('created_at', 'DESC')->setPageSize(1)->setCurPage(1);
+                $order = Mage::getModel('sales/order')->load($orders->getFirstItem()->getEntityId());
+                $storeId = $order->getStore()->getId();
+                $paymentBlock = Mage::helper('payment')->getInfoBlock($order->getPayment());
+                $paymentBlock->getMethod()->setStore($storeId);
+
+                $datas['order'] = $order;
+                $datas['billing'] = $order->getBillingAddress();
+                $datas['billingAddress'] = $order->getBillingAddress();
+                $datas['shippingAddress'] = $order->getShippingAddress();
+                $datas['payment_html'] = $paymentBlock->toHtml();
+                Mage::app()->getCache()->save(serialize($datas) , $cacheId);
+            }
+        }
+
+        /* Shipment
+         -------------------------- */
+
+        if (isset($template['shipment'])) {
+            $datas['shipment'] = $this->getInvoice();
+        }
+
+        /* Invoice
+         -------------------------- */
+        if (isset($template['invoice'])) {
+            $datas['invoice'] = $this->getInvoice();
+        }
+
+        /* Credit memo
+         -------------------------- */
+
+        if (isset($template['creditmemo'])) {
+            $datas['creditmemo'] = $this->getCreditMemo();
+        }
+
+        /* Payment failed
+         -------------------------- */
+
+        if ($tpl == 'checkout_payment_failed_template' && is_object($datas['order'])) {
+            $datas['reason'] = 'oops';
+            $datas['checkoutType'] = 'onepage';
+            $datas['dateAndTime'] = Mage::app()->getLocale()->date();
+            $datas['customer'] = $datas['customerName'];
+            $datas['total'] = '€ 100';
+            $datas['shippingMethod'] = 'ups_worldwide_example';
+            $datas['paymentMethod'] = 'visa_worldwide_example';
+            $datas['items'] = 'Apple Watch x 5  €10000<br />Apple Watch x 10  €20000';
+        }
+
+        /* Contact template
+         -------------------------- */
+
+        if ($tpl == 'contacts_email_email_template') {
+            $datas['data'] = $this->getData();
+        }
+
+        /* New account & Forgot password
+         -------------------------- */
+
+        if (isset($template['customer'])) {
+
+            $cacheId = $cachePrefixKey . 'customer_data';
+            if (false !== ($data = Mage::app()->getCache()->load($cacheId))) {
+                $_datas = unserialize($data);
+                $datas['customer'] = $_datas['customer'];
+                $datas['customerName'] = $_datas['customer']->getName();
+            }
+            else {
+                $collection = Mage::getModel('customer/customer')->getCollection()->addAttributeToSort('entity_id', 'desc')->setPageSize(1);
+                $datas['customer'] = $collection->getFirstItem();
+                $datas['customer']->setData('name', '****');
+                $datas['customer']->setData('password', '****');
+                $datas['customer']->setData('rp_token', md5('coucou'));
+                Mage::app()->getCache()->save(serialize($datas) , $cacheId);
+            }
+        }
+
+        /* Stock & price alert
+         -------------------------- */
+
+        if (isset($template['alertGrid'])) {
+            $datas['alertGrid'] = $this->getAlertGrid($datas['customer']);
+        }
+
+        /* Subscription confirmation
+         -------------------------- */
+
+        if ($tpl == 'newsletter_subscription_confirm_email_template') {
+            $datas['subscriber'] = $this->getSubscriber();
+        }
+
+        /* Wishlist
+         -------------------------- */
+
+        if ($tpl == 'wishlist_email_email_template') {
+            $datas['items'] = $this->getWishlistItems();
+            $datas['message'] = 'Please buy this';
+        }
+
+        /* AW Help Desk 3
+         -------------------------- */
+
+        if (isset($template['aw_hdu3'])) {
+            $datas['is_agent_changed'] = true;
+            $datas['is_department_changed'] = true;
+            $datas['is_status_changed'] = true;
+            $datas['agent_name'] = 'Jean-Michel Support';
+            $datas['department_name'] = 'Main Department';
+            $datas['ticket_status'] = 'Waiting for reply';
+            $datas['ticket_uid'] = 'OBO-46271';
+            $datas['ticket_subject'] = 'The world needs dreamers and the world needs doers.';
+        }
+        return $datas;
     }
 
     function getShipment() {
@@ -324,6 +463,7 @@ class inteGentoEmailTester {
 
     function setMailTemplateAndUseDatas($tpl, $store, $datas) {
         $this->mailTemplate = $this->mailModel->load(3)->loadDefault($tpl);
+
         $this->mailTemplate->setDesignConfig(array(
             'area' => 'frontend',
             'store' => $store
@@ -353,12 +493,16 @@ class inteGentoEmailTester {
     }
 
     function getTemplateDetails($tpl, $datas) {
+        if (!isset($this->templates[$tpl])) {
+            return;
+        }
+        $_template = $this->templates[$tpl];
         echo '<!DOCTYPE HTML><html lang="en-EN"><head><meta charset="UTF-8" /><title>' . $tpl . '</title></head><body>';
-        echo '<h1>' . $tpl . '</h1>';
-        if (isset($this->templates[$tpl]['templates'])) {
-            echo '<h2>Templates</h2>';
+        echo '<h1>Template : ' . $_template['name'] . '</h1>';
+        if (isset($_template['templates'])) {
+            echo '<h2>Files</h2>';
             echo '<ul>';
-            foreach ($this->templates[$tpl]['templates'] as $value) {
+            foreach ($_template['templates'] as $value) {
                 echo '<li>' . $value . '</li>';
             }
             echo '</ul>';
@@ -409,4 +553,3 @@ class inteGentoEmailTester {
     }
 }
 
-$inteGentoEmailTester = new inteGentoEmailTester();

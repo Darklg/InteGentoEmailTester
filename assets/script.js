@@ -2,6 +2,9 @@
     'use strict';
     /* Form action */
     var form = document.getElementById('integento-form');
+    document.getElementById('button_details').addEventListener('click', function(e) {
+        form.target = 'preview';
+    }, false);
     document.getElementById('button_preview').addEventListener('click', function(e) {
         form.target = 'preview';
     }, false);
