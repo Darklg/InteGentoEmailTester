@@ -16,7 +16,7 @@
 <?php
 
 /* Templates */
-echo '<p><label for="template">Template :</label><br />';
+echo '<p><label for="template">Template :</label>';
 echo '<select id="template" name="template">';
 foreach ($templates as $tpl_id => $template) {
     $tplName = $tpl_id;
@@ -28,7 +28,7 @@ foreach ($templates as $tpl_id => $template) {
 echo '</select></p>';
 
 /* Stores */
-echo '<p><label for="store">Store :</label><br />';
+echo '<p><label for="store">Store :</label>';
 echo '<select id="store" name="store">';
 $i = 0;
 $_lastGroup = '';
@@ -49,7 +49,7 @@ echo '</optgroup>';
 echo '</select></p>';
 
 /* Email */
-echo '<p id="box-email"><label for="email">Email</label><br /><input type="email" id="email" name="email" value="'.(isset($_SESSION['integento__emailtester__email']) ? $_SESSION['integento__emailtester__email'] : '').'" /></p>';
+echo '<p id="box-email"><label for="email">Email</label><input type="email" id="email" name="email" value="'.(isset($_SESSION['integento__emailtester__email']) ? $_SESSION['integento__emailtester__email'] : '').'" /></p>';
 
 ?>
 <button type="submit" id="button_preview" name="submit">Preview</button>

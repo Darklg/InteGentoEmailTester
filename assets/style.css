@@ -18,6 +18,10 @@ body > * {
     overflow: hidden;
 }
 
+body {
+    font: 13px/1.5 sans-serif;
+}
+
 body > * {
     float: left;
     width: 50%;
@@ -81,10 +85,25 @@ iframe {
   Form items
 ---------------------------------------------------------- */
 
+label {
+    display: block;
+    font-weight: bold;
+    line-height: 2;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
 select,
 input[type=email],
 button {
     font-size: 13px;
+}
+
+select {
+    border: 1px solid #CCC;
+    cursor: pointer;
 }
 
 select,
@@ -110,4 +129,28 @@ button {
 
 button.main {
     background-color: #9C9;
+}
+
+/* ----------------------------------------------------------
+  Preview & text
+---------------------------------------------------------- */
+
+h2 {
+    padding-bottom: 0;
+}
+
+li {
+    z-index: 1;
+    position: relative;
+    padding-left: 10px;
+    line-height: 1.5;
+}
+
+li:before {
+    content: '•';
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    line-height: 1.7;
 }

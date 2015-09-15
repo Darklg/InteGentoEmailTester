@@ -496,13 +496,46 @@ class inteGentoEmailTester {
         if (!isset($this->templates[$tpl])) {
             return;
         }
+
         $_template = $this->templates[$tpl];
-        echo '<!DOCTYPE HTML><html lang="en-EN"><head><meta charset="UTF-8" /><title>' . $tpl . '</title></head><body>';
+
+        /* Fake a template inclusion */
+        ob_start();
+        echo $this->displayTemplate($datas);
+        ob_get_clean();
+
+        /* Retrieve included files */
+        $included_files = array();
+        if (isset($_template['templates'])) {
+            $all_included_files = get_included_files();
+            foreach ($all_included_files as $file) {
+                /* Keep only .phtml files */
+                if (strrchr($file, '.phtml') == '.phtml') {
+                    $file_details = explode('app/', $file);
+                    $included_files[] = 'app/' . end($file_details);
+                }
+            }
+        }
+
+        /* Display page */
+        echo '<!DOCTYPE HTML><html lang="en-EN"><head>';
+        echo '<meta charset="UTF-8" />';
+        echo '<title>' . $tpl . '</title>';
+        echo '<link rel="stylesheet" type="text/css" href="assets/style.css" />';
+        echo '</head><body>';
         echo '<h1>Template : ' . $_template['name'] . '</h1>';
         if (isset($_template['templates'])) {
-            echo '<h2>Files</h2>';
+            echo '<h2>Template file</h2>';
             echo '<ul>';
             foreach ($_template['templates'] as $value) {
+                echo '<li>' . $value . '</li>';
+            }
+            echo '</ul>';
+        }
+        if (!empty($included_files)) {
+            echo '<h2>Included files</h2>';
+            echo '<ul>';
+            foreach ($included_files as $value) {
                 echo '<li>' . $value . '</li>';
             }
             echo '</ul>';
