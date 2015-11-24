@@ -308,7 +308,7 @@ class inteGentoEmailTester {
 
         if (isset($template['customer'])) {
 
-            $cacheId = $cachePrefixKey . 'customer_data';
+            $cacheId = $cachePrefixKey . 'customerazaezz_data';
             if (false !== ($data = Mage::app()->getCache()->load($cacheId))) {
                 $_datas = unserialize($data);
                 $datas['customer'] = $_datas['customer'];
@@ -316,7 +316,7 @@ class inteGentoEmailTester {
             }
             else {
                 $collection = Mage::getModel('customer/customer')->getCollection()->addAttributeToSort('entity_id', 'desc')->setPageSize(1);
-                $datas['customer'] = $collection->getFirstItem();
+                $datas['customer'] = Mage::getModel('customer/customer')->load($collection->getFirstItem()->getId());
                 $datas['customer']->setData('name', '****');
                 $datas['customer']->setData('password', '****');
                 $datas['customer']->setData('rp_token', md5('coucou'));
