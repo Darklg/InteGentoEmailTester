@@ -45,24 +45,30 @@ class inteGentoEmailTester {
             'creditmemo' => 1,
         ) ,
         'sales_email_order_comment_template' => array(
+            'conf' => 'sales_email/order_comment/template',
             'order' => 1,
         ) ,
         'sales_email_order_template' => array(
+            'conf' => 'sales_email/order/template',
             'order' => 1,
         ) ,
         'sales_email_shipment_comment_template' => array(
+            'conf' => 'sales_email/shipment_comment/template',
             'order' => 1,
             'shipment' => 1,
         ) ,
         'sales_email_shipment_template' => array(
+            'conf' => 'sales_email/shipment/template',
             'order' => 1,
             'shipment' => 1,
         ) ,
         'sales_email_invoice_comment_template' => array(
+            'conf' => 'sales_email/invoice_comment/template',
             'order' => 1,
             'invoice' => 1,
         ) ,
         'sales_email_invoice_template' => array(
+            'conf' => 'sales_email/invoice/template',
             'order' => 1,
             'invoice' => 1,
         ) ,
@@ -158,6 +164,9 @@ class inteGentoEmailTester {
                 continue;
             }
             if (isset($templates[$val])) {
+                if (!isset($templates[$val]['conf'])) {
+                    $templates[$val]['conf'] = '';
+                }
                 $templates[$val]['name'] = $_option['label'];
                 if (!isset($templates[$val]['templates'])) {
                     $templates[$val]['templates'] = array();
@@ -462,12 +471,28 @@ class inteGentoEmailTester {
     ---------------------------------------------------------- */
 
     function setMailTemplateAndUseDatas($tpl, $store, $datas) {
-        $this->mailTemplate = $this->mailModel->load(3)->loadDefault($tpl);
+
+        $this->mailTemplate = $this->mailModel->load(4)->loadDefault($tpl);
 
         $this->mailTemplate->setDesignConfig(array(
             'area' => 'frontend',
             'store' => $store
         ));
+
+        $_templateId = 0;
+        if (isset($this->templates[$tpl]['conf'])) {
+            $_templateId = Mage::getStoreConfig($this->templates[$tpl]['conf']);
+        }
+
+        $_templateText = '';
+        if (is_numeric($_templateId) && $_templateId > 0) {
+            $_templateText = $this->getTemplateTextByCode($_templateId);
+        }
+
+        if (!empty($_templateText)) {
+            $this->mailTemplate->setData('template_text', $_templateText);
+        }
+
         if (isset($_GET['email'], $_GET['send']) && filter_var($_GET['email'], FILTER_VALIDATE_EMAIL) !== false) {
             $_SESSION['integento__emailtester__email'] = $_GET['email'];
             $this->sendTemplateByMail($_GET['email'], $datas);
@@ -509,6 +534,7 @@ class inteGentoEmailTester {
         if (isset($_template['templates'])) {
             $all_included_files = get_included_files();
             foreach ($all_included_files as $file) {
+
                 /* Keep only .phtml files */
                 if (strrchr($file, '.phtml') == '.phtml') {
                     $file_details = explode('app/', $file);
@@ -544,8 +570,8 @@ class inteGentoEmailTester {
         echo '</body></html>';
         return;
     }
-    function saveTemplateInAdmin($tpl, $datas) {
 
+    function saveTemplateInAdmin($tpl, $datas) {
         $_core = Mage::getSingleton('core/resource');
         $_read = $_core->getConnection('core_read');
         $_write = $_core->getConnection('core_write');
@@ -578,6 +604,19 @@ class inteGentoEmailTester {
         $_write->insert($_tableName, $_tpl);
 
         $this->addMessageAndRedirect('success', sprintf('The template named <b>"%s"</b> has been successfully saved !', $_tpl['template_code']));
+    }
+
+    function getTemplateTextByCode($id){
+        $_core = Mage::getSingleton('core/resource');
+        $_read = $_core->getConnection('core_read');
+        $_tableName = $_core->getTableName('core_email_template');
+
+        $_templateText = '';
+        $_col = $_read->fetchCol('SELECT template_text FROM ' . $_tableName . ' WHERE template_id=' . $id);
+        if(isset($_col[0])){
+            $_templateText = $_col[0];
+        }
+        return $_templateText;
     }
 
     function displayTemplate($datas) {
