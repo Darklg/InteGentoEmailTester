@@ -15,32 +15,49 @@ class inteGentoEmailTester {
             'aw_hdu3' => 1
         ) ,
         'catalog_productalert_email_price_template' => array(
+            'conf' => 'catalog/productalert/email_price_template',
             'alertGrid' => 1,
             'customer' => 1,
         ) ,
         'catalog_productalert_email_stock_template' => array(
+            'conf' => 'catalog/productalert/email_stock_template',
             'alertGrid' => 1,
             'customer' => 1,
         ) ,
         'checkout_payment_failed_template' => array(
+            'conf' => 'customer/create_account/email_template',
             'order' => 1,
         ) ,
-        'contacts_email_email_template' => array() ,
+        'contacts_email_email_template' => array(
+            'conf' => 'contacts/email/email_template'
+        ) ,
         'customer_create_account_email_template' => array(
+            'conf' => 'customer/create_account/email_template',
             'customer' => 1,
         ) ,
         'customer_password_forgot_email_template' => array(
+            'conf' => 'customer/password/forgot_email_template',
             'customer' => 1,
         ) ,
-        'newsletter_subscription_confirm_email_template' => array() ,
-        'newsletter_subscription_success_email_template' => array() ,
-        'newsletter_subscription_un_email_template' => array() ,
-        'sendfriend_email_template' => array() ,
+        'newsletter_subscription_confirm_email_template' => array(
+            'conf' => 'newsletter/subscription/confirm_email_template',
+        ) ,
+        'newsletter_subscription_success_email_template' => array(
+            'conf' => 'newsletter/subscription/success_email_template',
+        ) ,
+        'newsletter_subscription_un_email_template' => array(
+            'conf' => 'newsletter/subscription/un_email_template',
+        ) ,
+        'sendfriend_email_template' => array(
+            'conf' => 'sendfriend/email/template'
+        ) ,
         'sales_email_creditmemo_comment_template' => array(
+            'conf' => 'sales_email/creditmemo_comment/template',
             'order' => 1,
             'creditmemo' => 1,
         ) ,
         'sales_email_creditmemo_template' => array(
+            'conf' => 'sales_email/creditmemo/template',
             'order' => 1,
             'creditmemo' => 1,
         ) ,
@@ -73,6 +90,7 @@ class inteGentoEmailTester {
             'invoice' => 1,
         ) ,
         'wishlist_email_email_template' => array(
+            'conf' => 'wishlist/email/email_template',
             'customer' => 1,
         ) ,
     );
@@ -498,7 +516,7 @@ class inteGentoEmailTester {
             $this->sendTemplateByMail($_GET['email'], $datas);
         }
         else if (isset($_GET['get_template_details'])) {
-            $this->getTemplateDetails($tpl, $datas);
+            $this->getTemplateDetails($tpl, $datas, $_templateId);
         }
         else if (isset($_GET['save_admin_tpl'])) {
             $this->saveTemplateInAdmin($tpl, $datas);
@@ -517,7 +535,7 @@ class inteGentoEmailTester {
         return;
     }
 
-    function getTemplateDetails($tpl, $datas) {
+    function getTemplateDetails($tpl, $datas, $tplId = 0) {
         if (!isset($this->templates[$tpl])) {
             return;
         }
@@ -543,6 +561,11 @@ class inteGentoEmailTester {
             }
         }
 
+        $_adminTemplate = array();
+        if (is_numeric($tplId) && $tplId > 0) {
+            $_adminTemplate = $this->getTemplateByCode($tplId);
+        }
+
         /* Display page */
         echo '<!DOCTYPE HTML><html lang="en-EN"><head>';
         echo '<meta charset="UTF-8" />';
@@ -550,11 +573,29 @@ class inteGentoEmailTester {
         echo '<link rel="stylesheet" type="text/css" href="assets/style.css" />';
         echo '</head><body>';
         echo '<h1>Template : ' . $_template['name'] . '</h1>';
+        if (is_array($_adminTemplate) && isset($_adminTemplate['template_id'])) {
+            echo '<h2>Admin template</h2>';
+            echo '<ul>';
+            echo '<li><strong>ID</strong>: ' . $_adminTemplate['template_id'] . '</li>';
+            if (isset($_template['conf'])) {
+                echo '<li><strong>Config</strong>: <span contenteditable>' . $_template['conf'] . '</span></li>';
+            }
+            echo '<li><strong>Code</strong>: <span contenteditable>' . $_adminTemplate['template_code'] . '</span></li>';
+            echo '<li><strong>Subject</strong>: <span contenteditable>' . $_adminTemplate['template_subject'] . '</span></li>';
+            if ($_adminTemplate['added_at']) {
+                echo '<li><strong>Added</strong>: ' . $_adminTemplate['added_at'] . '</li>';
+            }
+            if ($_adminTemplate['modified_at']) {
+                echo '<li><strong>Modified</strong>: ' . $_adminTemplate['modified_at'] . '</li>';
+            }
+            echo '</ul>';
+        }
+
         if (isset($_template['templates'])) {
             echo '<h2>Template file</h2>';
             echo '<ul>';
             foreach ($_template['templates'] as $value) {
-                echo '<li>' . $value . '</li>';
+                echo '<li contenteditable>' . $value . '</li>';
             }
             echo '</ul>';
         }
@@ -562,7 +603,7 @@ class inteGentoEmailTester {
             echo '<h2>Included files</h2>';
             echo '<ul>';
             foreach ($included_files as $value) {
-                echo '<li>' . $value . '</li>';
+                echo '<li contenteditable>' . $value . '</li>';
             }
             echo '</ul>';
         }
@@ -606,22 +647,25 @@ class inteGentoEmailTester {
         $this->addMessageAndRedirect('success', sprintf('The template named <b>"%s"</b> has been successfully saved !', $_tpl['template_code']));
     }
 
-    function getTemplateTextByCode($id){
+    function getTemplateByCode($id) {
         $_core = Mage::getSingleton('core/resource');
         $_read = $_core->getConnection('core_read');
         $_tableName = $_core->getTableName('core_email_template');
-
         $_templateText = '';
-        $_col = $_read->fetchCol('SELECT template_text FROM ' . $_tableName . ' WHERE template_id=' . $id);
-        if(isset($_col[0])){
-            $_templateText = $_col[0];
+        return $_read->fetchRow('SELECT * FROM ' . $_tableName . ' WHERE template_id=' . $id);
+    }
+
+    function getTemplateTextByCode($id) {
+        $_row = $this->getTemplateByCode($id);
+        if (is_array($_row) && isset($_row['template_text'])) {
+            $_templateText = $_row['template_text'];
         }
         return $_templateText;
     }
 
     function displayTemplate($datas) {
         header('Content-Type: text/html; charset=utf-8');
-        return $this->mailTemplate->getProcessedTemplate($datas);
+        return $this->mailTemplate->getProcessedTemplate($datas, true);
     }
 }
 
