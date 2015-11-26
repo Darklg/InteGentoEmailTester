@@ -105,10 +105,21 @@ class inteGentoEmailTester {
         $this->mailModel = Mage::getModel('core/email_template');
         $this->storeName = Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME);
         $this->storeEmail = Mage::getStoreConfig('trans_email/ident_general/email');
+        $this->localeCode = Mage::app()->getLocale()->getLocaleCode();
+        $this->localeCodeDefault = 'en_US';
+        $this->emailBasePath = Mage::getBaseDir('locale') . DS . '%s' . DS . 'template' . DS . 'email' . DS;
+        $this->emailPath = sprintf($this->emailBasePath, $this->localeCode);
+        $this->emailPathDefault = sprintf($this->emailBasePath, $this->localeCodeDefault);
 
         $this->setTemplates($this->templates);
 
         $this->setMessages();
+    }
+
+    function setStore($store) {
+        $this->store = $store;
+        $this->storeName = Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME, $store);
+        $this->storeEmail = Mage::getStoreConfig('trans_email/ident_general/email', $store);
     }
 
     /* ----------------------------------------------------------
@@ -335,7 +346,7 @@ class inteGentoEmailTester {
 
         if (isset($template['customer'])) {
 
-            $cacheId = $cachePrefixKey . 'customerazaezz_data';
+            $cacheId = $cachePrefixKey . 'customer_data';
             if (false !== ($data = Mage::app()->getCache()->load($cacheId))) {
                 $_datas = unserialize($data);
                 $datas['customer'] = $_datas['customer'];
@@ -490,7 +501,7 @@ class inteGentoEmailTester {
 
     function setMailTemplateAndUseDatas($tpl, $store, $datas) {
 
-        $this->mailTemplate = $this->mailModel->load(4)->loadDefault($tpl);
+        $this->mailTemplate = $this->mailModel->loadDefault($tpl);
 
         $this->mailTemplate->setDesignConfig(array(
             'area' => 'frontend',
@@ -499,7 +510,7 @@ class inteGentoEmailTester {
 
         $_templateId = 0;
         if (isset($this->templates[$tpl]['conf'])) {
-            $_templateId = Mage::getStoreConfig($this->templates[$tpl]['conf']);
+            $_templateId = Mage::getStoreConfig($this->templates[$tpl]['conf'], $store);
         }
 
         $_templateText = '';
@@ -561,9 +572,35 @@ class inteGentoEmailTester {
             }
         }
 
+        /* Admin template */
         $_adminTemplate = array();
         if (is_numeric($tplId) && $tplId > 0) {
             $_adminTemplate = $this->getTemplateByCode($tplId);
+        }
+
+        /* Get template text */
+        $_templateText = '';
+        $_templateSrc = '';
+
+        // Get text from current locale
+        if (isset($_template['templates'][0]) && file_exists($this->emailPath . $_template['templates'][0])) {
+            $_templateSrc = $this->emailPath . $_template['templates'][0];
+            $_templateText = file_get_contents($_templateSrc);
+        }
+
+        // Get text from default locale
+        if (empty($_templateText) && isset($_template['templates'][0]) && file_exists($this->emailPathDefault . $_template['templates'][0])) {
+            $_templateSrc = $this->emailPathDefault . $_template['templates'][0];
+            $_templateText = file_get_contents($_templateSrc);
+        }
+
+        // Get text from admin
+        if (is_array($_adminTemplate) && isset($_adminTemplate['template_text'])) {
+            $_templateText = $_adminTemplate['template_text'];
+            $_templateSrc = 'Admin template';
+            if (isset($_template['conf'])) {
+                $_templateSrc.= ' (' . $_template['conf'] . ')';
+            }
         }
 
         /* Display page */
@@ -589,6 +626,14 @@ class inteGentoEmailTester {
                 echo '<li><strong>Modified</strong>: ' . $_adminTemplate['modified_at'] . '</li>';
             }
             echo '</ul>';
+        }
+
+        if (!empty($_templateText)) {
+            echo '<h2>Template Content</h2>';
+            echo '<div>';
+            echo '<textarea cols="30" rows="10" style="width:100%;height:100px;font-family:monospace;" onfocus="this.select()">' . htmlentities($_templateText) . '</textarea>';
+            echo '<div><strong>Source:</strong> <span contenteditable>' . $_templateSrc . '</span></div>';
+            echo '</div>';
         }
 
         if (isset($_template['templates'])) {
@@ -619,7 +664,7 @@ class inteGentoEmailTester {
         $_templates = $this->getTemplates();
         $_tableName = $_core->getTableName('core_email_template');
         $_tpl = $this->mailTemplate->getData();
-        $_tpl['template_code'] = '[' . $datas['store']->getName() . '] ';
+        $_tpl['template_code'] = '[' . $datas['store']->getWebsite()->getName() . ' : ' . $datas['store']->getName() . '] ';
         if ($this->mailTemplate->getData('template_code')) {
             $_tpl['template_code'].= $this->mailTemplate->getData('template_code');
         }
@@ -651,12 +696,12 @@ class inteGentoEmailTester {
         $_core = Mage::getSingleton('core/resource');
         $_read = $_core->getConnection('core_read');
         $_tableName = $_core->getTableName('core_email_template');
-        $_templateText = '';
         return $_read->fetchRow('SELECT * FROM ' . $_tableName . ' WHERE template_id=' . $id);
     }
 
     function getTemplateTextByCode($id) {
         $_row = $this->getTemplateByCode($id);
+        $_templateText = '';
         if (is_array($_row) && isset($_row['template_text'])) {
             $_templateText = $_row['template_text'];
         }

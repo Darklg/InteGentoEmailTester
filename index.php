@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.21
+ * Email tester v 0.22
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_21';
+$testerVersion = '0_22';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 /* ----------------------------------------------------------
@@ -69,6 +69,8 @@ if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $templates
 if (isset($_GET['store']) && array_key_exists($_GET['store'], $_stores)) {
     $_store = $_GET['store'];
 }
+
+$inteGentoEmailTester->setStore($_store);
 
 $_SESSION['integento__emailtester__store'] = $_store;
 $_locale = Mage::getStoreConfig('general/locale/code', $_store);
