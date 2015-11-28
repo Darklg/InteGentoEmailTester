@@ -688,6 +688,11 @@ class inteGentoEmailTester {
         }
 
         $_write->insert($_tableName, $_tpl);
+        $_lastInsertId = $_write->lastInsertId();
+
+        if (isset($_templates[$tpl]['conf']) && is_numeric($_lastInsertId)) {
+            Mage::getConfig()->saveConfig($_templates[$tpl]['conf'], intval($_lastInsertId), 'stores', $this->store);
+        }
 
         $this->addMessageAndRedirect('success', sprintf('The template named <b>"%s"</b> has been successfully saved !', $_tpl['template_code']));
     }

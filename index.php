@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.22
+ * Email tester v 0.23
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_22';
+$testerVersion = '0_23';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 /* ----------------------------------------------------------
