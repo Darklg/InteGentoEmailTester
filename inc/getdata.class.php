@@ -532,6 +532,9 @@ class inteGentoEmailTester {
         else if (isset($_GET['save_admin_tpl'])) {
             $this->saveTemplateInAdmin($tpl, $datas);
         }
+        else if (isset($_GET['delete_admin_tpl'])) {
+            $this->deleteTemplateInAdmin($tpl);
+        }
         else {
             echo $this->displayTemplate($datas);
             die;
@@ -573,6 +576,7 @@ class inteGentoEmailTester {
         }
 
         /* Admin template */
+        $_isAdminTemplate = false;
         $_adminTemplate = array();
         if (is_numeric($tplId) && $tplId > 0) {
             $_adminTemplate = $this->getTemplateByCode($tplId);
@@ -610,7 +614,9 @@ class inteGentoEmailTester {
         echo '<link rel="stylesheet" type="text/css" href="assets/style.css" />';
         echo '</head><body>';
         echo '<h1>Template : ' . $_template['name'] . '</h1>';
+
         if (is_array($_adminTemplate) && isset($_adminTemplate['template_id'])) {
+            $_isAdminTemplate = true;
             echo '<h2>Admin template</h2>';
             echo '<ul>';
             echo '<li><strong>ID</strong>: ' . $_adminTemplate['template_id'] . '</li>';
@@ -634,6 +640,18 @@ class inteGentoEmailTester {
             echo '<textarea cols="30" rows="10" style="width:100%;height:100px;font-family:monospace;" onfocus="this.select()">' . htmlentities($_templateText) . '</textarea>';
             echo '<div><strong>Source:</strong> <span contenteditable>' . $_templateSrc . '</span></div>';
             echo '</div>';
+
+            // Form
+            echo '<form action="" target="_parent" method="get"><div>
+            <input type="hidden" name="template" value="' . $tpl . '" />
+            <input type="hidden" name="store" value="' . $this->store . '" />';
+            if ($_isAdminTemplate) {
+                echo '<button type="submit" id="button_delete" name="delete_admin_tpl">Delete this admin Template</button>';
+            }
+            else {
+                echo '<button type="submit" id="button_save" name="save_admin_tpl">Save as admin Template</button>';
+            }
+            echo '</div></form>';
         }
 
         if (isset($_template['templates'])) {
@@ -644,6 +662,7 @@ class inteGentoEmailTester {
             }
             echo '</ul>';
         }
+
         if (!empty($included_files)) {
             echo '<h2>Included files</h2>';
             echo '<ul>';
@@ -653,6 +672,7 @@ class inteGentoEmailTester {
             echo '</ul>';
         }
 
+        echo '<script src="assets/script.js"></script>';
         echo '</body></html>';
         return;
     }
@@ -691,10 +711,40 @@ class inteGentoEmailTester {
         $_lastInsertId = $_write->lastInsertId();
 
         if (isset($_templates[$tpl]['conf']) && is_numeric($_lastInsertId)) {
-            Mage::getConfig()->saveConfig($_templates[$tpl]['conf'], intval($_lastInsertId), 'stores', $this->store);
+            $this->saveConfig($_templates[$tpl]['conf'], intval($_lastInsertId));
         }
 
         $this->addMessageAndRedirect('success', sprintf('The template named <b>"%s"</b> has been successfully saved !', $_tpl['template_code']));
+    }
+
+    function deleteTemplateInAdmin($tpl) {
+        $_core = Mage::getSingleton('core/resource');
+        $_read = $_core->getConnection('core_read');
+        $_write = $_core->getConnection('core_write');
+        $_templates = $this->getTemplates();
+        $_tableName = $_core->getTableName('core_email_template');
+
+        if (!isset($_templates[$tpl]['conf'])) {
+            $this->addMessageAndRedirect('error', sprintf('The template <b>"%s"</b> do not have a config yet.', $tpl));
+            return;
+        }
+        Mage::app()->getCacheInstance()->cleanType('config');
+
+        $_templateId = Mage::getStoreConfig($_templates[$tpl]['conf'], $this->store);
+        $_existingTemplatesCodes = $_read->fetchCol('SELECT template_id FROM ' . $_tableName);
+
+        if (in_array($_templateId, $_existingTemplatesCodes)) {
+            $this->saveConfig($_templates[$tpl]['conf'], $tpl);
+            $_write->delete($_tableName, "template_id=" . $_templateId);
+            $this->addMessageAndRedirect('success', sprintf('The template named <b>"%s"</b> has been successfully deleted !', $tpl));
+        }
+        else {
+            $this->addMessageAndRedirect('error', sprintf('The template <b>"%s"</b> was not saved in database.', $tpl));
+        }
+    }
+
+    function saveConfig($name, $value) {
+        Mage::getConfig()->saveConfig($name, $value, 'stores', $this->store)->cleanCache();
     }
 
     function getTemplateByCode($id) {
