@@ -101,18 +101,12 @@ class inteGentoEmailTester {
 
     function __construct() {
         @session_start();
-
+        $this->baseDir = Mage::getBaseDir();
         $this->mailModel = Mage::getModel('core/email_template');
-        $this->storeName = Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME);
-        $this->storeEmail = Mage::getStoreConfig('trans_email/ident_general/email');
-        $this->localeCode = Mage::app()->getLocale()->getLocaleCode();
         $this->localeCodeDefault = 'en_US';
         $this->emailBasePath = Mage::getBaseDir('locale') . DS . '%s' . DS . 'template' . DS . 'email' . DS;
-        $this->emailPath = sprintf($this->emailBasePath, $this->localeCode);
-        $this->emailPathDefault = sprintf($this->emailBasePath, $this->localeCodeDefault);
-
+        $this->setStore(0);
         $this->setTemplates($this->templates);
-
         $this->setMessages();
     }
 
@@ -120,6 +114,9 @@ class inteGentoEmailTester {
         $this->store = $store;
         $this->storeName = Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME, $store);
         $this->storeEmail = Mage::getStoreConfig('trans_email/ident_general/email', $store);
+        $this->localeCode = Mage::getStoreConfig('general/locale/code', $store) ;
+        $this->emailPath = sprintf($this->emailBasePath, $this->localeCode);
+        $this->emailPathDefault = sprintf($this->emailBasePath, $this->localeCodeDefault);
     }
 
     /* ----------------------------------------------------------
@@ -261,9 +258,10 @@ class inteGentoEmailTester {
             'customer_first_name' => 'Jean-Pierre',
             'sender_name' => 'Jean-Pierre Ipsum',
             'product_url' => 'https://github.com/Darklg',
-            'product_name' => 'Barre de faire',
+            'product_name' => 'Fake Product Name',
             'product_image' => 'http://placehold.it/75x75',
-            'message' => 'The world needs dreamers and the world needs doers. But above all, the world needs dreamers who do — Sarah Ban Breathnach. Everyone who has ever taken a shower has had an idea. It’s the person who gets out of the shower, dries off, and does something about it that makes a difference — Nolan Bushnell. ',
+            'comment' => '(EmailTester: Fake comment) The world needs dreamers and the world needs doers. But above all, the world needs dreamers who do — Sarah Ban Breathnach. Everyone who has ever taken a shower has had an idea. It’s the person who gets out of the shower, dries off, and does something about it that makes a difference — Nolan Bushnell. ',
+            'message' => '(EmailTester: Fake message) The world needs dreamers and the world needs doers. But above all, the world needs dreamers who do — Sarah Ban Breathnach. Everyone who has ever taken a shower has had an idea. It’s the person who gets out of the shower, dries off, and does something about it that makes a difference — Nolan Bushnell. ',
         );
 
         $template = $this->templates[$tpl];
@@ -500,7 +498,7 @@ class inteGentoEmailTester {
     ---------------------------------------------------------- */
 
     function setMailTemplateAndUseDatas($tpl, $store, $datas) {
-
+        $_request = Mage::app()->getRequest()->getParams();
         $this->mailTemplate = $this->mailModel->loadDefault($tpl);
 
         $this->mailTemplate->setDesignConfig(array(
@@ -522,17 +520,17 @@ class inteGentoEmailTester {
             $this->mailTemplate->setData('template_text', $_templateText);
         }
 
-        if (isset($_GET['email'], $_GET['send']) && filter_var($_GET['email'], FILTER_VALIDATE_EMAIL) !== false) {
-            $_SESSION['integento__emailtester__email'] = $_GET['email'];
-            $this->sendTemplateByMail($_GET['email'], $datas);
+        if (isset($_request['email'], $_request['send']) && filter_var($_request['email'], FILTER_VALIDATE_EMAIL) !== false) {
+            $_SESSION['integento__emailtester__email'] = $_request['email'];
+            $this->sendTemplateByMail($_request['email'], $datas);
         }
-        else if (isset($_GET['get_template_details'])) {
+        else if (isset($_request['get_template_details'])) {
             $this->getTemplateDetails($tpl, $datas, $_templateId);
         }
-        else if (isset($_GET['save_admin_tpl'])) {
+        else if (isset($_request['save_admin_tpl'])) {
             $this->saveTemplateInAdmin($tpl, $datas);
         }
-        else if (isset($_GET['delete_admin_tpl'])) {
+        else if (isset($_request['delete_admin_tpl'])) {
             $this->deleteTemplateInAdmin($tpl);
         }
         else {
@@ -607,73 +605,10 @@ class inteGentoEmailTester {
             }
         }
 
-        /* Display page */
-        echo '<!DOCTYPE HTML><html lang="en-EN"><head>';
-        echo '<meta charset="UTF-8" />';
-        echo '<title>' . $tpl . '</title>';
-        echo '<link rel="stylesheet" type="text/css" href="assets/style.css" />';
-        echo '</head><body>';
-        echo '<h1>Template : ' . $_template['name'] . '</h1>';
+        $_templateSrc = str_replace($this->baseDir, '', $_templateSrc);
 
-        if (is_array($_adminTemplate) && isset($_adminTemplate['template_id'])) {
-            $_isAdminTemplate = true;
-            echo '<h2>Admin template</h2>';
-            echo '<ul>';
-            echo '<li><strong>ID</strong>: ' . $_adminTemplate['template_id'] . '</li>';
-            if (isset($_template['conf'])) {
-                echo '<li><strong>Config</strong>: <span contenteditable>' . $_template['conf'] . '</span></li>';
-            }
-            echo '<li><strong>Code</strong>: <span contenteditable>' . $_adminTemplate['template_code'] . '</span></li>';
-            echo '<li><strong>Subject</strong>: <span contenteditable>' . $_adminTemplate['template_subject'] . '</span></li>';
-            if ($_adminTemplate['added_at']) {
-                echo '<li><strong>Added</strong>: ' . $_adminTemplate['added_at'] . '</li>';
-            }
-            if ($_adminTemplate['modified_at']) {
-                echo '<li><strong>Modified</strong>: ' . $_adminTemplate['modified_at'] . '</li>';
-            }
-            echo '</ul>';
-        }
+        include 'details.php';
 
-        if (!empty($_templateText)) {
-            echo '<h2>Template Content</h2>';
-            echo '<div>';
-            echo '<textarea cols="30" rows="10" style="width:100%;height:100px;font-family:monospace;" onfocus="this.select()">' . htmlentities($_templateText) . '</textarea>';
-            echo '<div><strong>Source:</strong> <span contenteditable>' . $_templateSrc . '</span></div>';
-            echo '</div>';
-
-            // Form
-            echo '<form action="" target="_parent" method="get"><div>
-            <input type="hidden" name="template" value="' . $tpl . '" />
-            <input type="hidden" name="store" value="' . $this->store . '" />';
-            if ($_isAdminTemplate) {
-                echo '<button type="submit" id="button_delete" name="delete_admin_tpl">Delete this admin Template</button>';
-            }
-            else {
-                echo '<button type="submit" id="button_save" name="save_admin_tpl">Save as admin Template</button>';
-            }
-            echo '</div></form>';
-        }
-
-        if (isset($_template['templates'])) {
-            echo '<h2>Template file</h2>';
-            echo '<ul>';
-            foreach ($_template['templates'] as $value) {
-                echo '<li contenteditable>' . $value . '</li>';
-            }
-            echo '</ul>';
-        }
-
-        if (!empty($included_files)) {
-            echo '<h2>Included files</h2>';
-            echo '<ul>';
-            foreach ($included_files as $value) {
-                echo '<li contenteditable>' . $value . '</li>';
-            }
-            echo '</ul>';
-        }
-
-        echo '<script src="assets/script.js"></script>';
-        echo '</body></html>';
         return;
     }
 

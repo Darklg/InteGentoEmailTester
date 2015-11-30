@@ -23,7 +23,8 @@ foreach ($templates as $tpl_id => $template) {
     if (isset($template['name'])) {
         $tplName = $template['name'];
     }
-    echo '<option value="' . $tpl_id . '"">' . $tplName . '</a></li>';
+    $_isCurrent = isset($_SESSION['integento__emailtester__tpl']) && $_SESSION['integento__emailtester__tpl'] == $tpl_id;
+    echo '<option ' . ($_isCurrent ? 'selected="selected"' : '') . ' value="' . $tpl_id . '"">' . $tplName . '</a></li>';
 }
 echo '</select></p>';
 

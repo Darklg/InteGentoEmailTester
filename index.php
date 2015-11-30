@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.24
+ * Email tester v 0.25
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_24';
+$testerVersion = '0_25';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 /* ----------------------------------------------------------
@@ -61,6 +61,8 @@ if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $templates
     include 'inc/default.php';
     die;
 }
+$_SESSION['integento__emailtester__tpl'] = $tpl;
+
 
 /* ----------------------------------------------------------
   Translate
