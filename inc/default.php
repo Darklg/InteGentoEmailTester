@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en_EN">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <title>Mail preview</title>
@@ -11,22 +11,34 @@
 
 <?php echo $inteGentoEmailTester->displayMessages(); ?>
 
-<form id="integento-form" action="" method="get">
-
+<form id="integento-form" action="index.php" method="get">
 <?php
-
 /* Templates */
 echo '<p><label for="template">Template :</label>';
 echo '<select id="template" name="template">';
-foreach ($templates as $tpl_id => $template) {
+$i = 0;
+$_lastGroup = '';
+foreach ($_templates as $tpl_id => $template) {
+    $_groupName = $template['group'];
+    if(isset($_groups[$_groupName])){
+        $_groupName = $_groups[$_groupName];
+    }
+    if ($_groupName != $_lastGroup) {
+        if ($i > 0) {
+            echo '</optgroup>';
+        }
+        echo '<optgroup label="' . $_groupName . '">';
+        $_lastGroup = $_groupName;
+    }
     $tplName = $tpl_id;
     if (isset($template['name'])) {
         $tplName = $template['name'];
     }
     $_isCurrent = isset($_SESSION['integento__emailtester__tpl']) && $_SESSION['integento__emailtester__tpl'] == $tpl_id;
-    echo '<option ' . ($_isCurrent ? 'selected="selected"' : '') . ' value="' . $tpl_id . '"">' . $tplName . '</a></li>';
+    echo '<option ' . ($_isCurrent ? 'selected="selected"' : '') . ' value="' . $tpl_id . '">' . $tplName . '</option>';
+    $i++;
 }
-echo '</select></p>';
+echo '</optgroup></select></p>';
 
 /* Stores */
 echo '<p><label for="store">Store :</label>';
@@ -43,7 +55,7 @@ foreach ($_stores as $storeId => $store) {
         $_lastGroup = $_groupName;
     }
     $_isCurrent = isset($_SESSION['integento__emailtester__store']) && $_SESSION['integento__emailtester__store'] == $storeId;
-    echo '<option ' . ($_isCurrent ? 'selected="selected"' : '') . ' value="' . $storeId . '"">' . $store->getName() . '</a></li>';
+    echo '<option ' . ($_isCurrent ? 'selected="selected"' : '') . ' value="' . $storeId . '">' . $store->getName() . '</option>';
     $i++;
 }
 echo '</optgroup>';
@@ -58,6 +70,6 @@ echo '<p id="box-email"><label for="email">Email</label><input type="email" id="
 <button type="submit" id="button_send" name="send">Send by email</button>
 </form>
 </div>
-<div class="preview"><iframe name="preview" frameborder="0"></iframe></div>
+<div class="preview"><iframe name="preview" style="border:0;"></iframe></div>
 <script src="assets/script.js"></script>
 </body></html>

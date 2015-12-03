@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Email tester v 0.25
+ * Email tester v 0.26
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_25';
+$testerVersion = '0_26';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 /* ----------------------------------------------------------
@@ -49,7 +49,8 @@ $inteGentoEmailTester = new inteGentoEmailTester();
 /* Get values
  -------------------------- */
 
-$templates = $inteGentoEmailTester->getTemplates();
+$_templates = $inteGentoEmailTester->getTemplates();
+$_groups = $inteGentoEmailTester->getGroups();
 $_stores = $inteGentoEmailTester->getStores();
 
 /* ----------------------------------------------------------
@@ -57,7 +58,7 @@ $_stores = $inteGentoEmailTester->getStores();
 ---------------------------------------------------------- */
 
 $tpl = $_GET['template'];
-if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $templates)) {
+if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $_templates)) {
     include 'inc/default.php';
     die;
 }

@@ -1,97 +1,214 @@
 <?php
 class inteGentoEmailTester {
 
+    private $groups = array(
+        'aw_hdu3' => 'aheadWorks : Help Desk Ultimate',
+        'productalert' => 'Catalog : product alert',
+        'customer' => 'Customer',
+        'newsletter' => 'Newsletter',
+        'sales_creditmemo' => 'Sales : Credit Memo',
+        'sales_order' => 'Sales : Order',
+        'sales_shipment' => 'Sales : Shipment',
+        'sales_invoice' => 'Sales : Invoice',
+        'errors' => 'Errors',
+        'share' => 'Share',
+        'others' => 'Others',
+    );
+
     private $templates = array(
+
+        /* Help Desk Ultimate - aheadWorks */
         'aw_hdu3_to_customer_new_ticket_email' => array(
+            'group' => 'aw_hdu3',
             'aw_hdu3' => 1
         ) ,
         'aw_hdu3_to_customer_new_ticket_by_admin_email' => array(
+            'group' => 'aw_hdu3',
             'aw_hdu3' => 1
         ) ,
         'aw_hdu3_to_customer_new_reply_email' => array(
+            'group' => 'aw_hdu3',
             'aw_hdu3' => 1
         ) ,
         'aw_hdu3_to_customer_ticket_changed' => array(
+            'group' => 'aw_hdu3',
             'aw_hdu3' => 1
         ) ,
+
+        /* Product alert */
         'catalog_productalert_email_price_template' => array(
+            'group' => 'productalert',
             'conf' => 'catalog/productalert/email_price_template',
             'alertGrid' => 1,
             'customer' => 1,
         ) ,
         'catalog_productalert_email_stock_template' => array(
+            'group' => 'productalert',
             'conf' => 'catalog/productalert/email_stock_template',
             'alertGrid' => 1,
             'customer' => 1,
         ) ,
-        'checkout_payment_failed_template' => array(
-            'conf' => 'customer/create_account/email_template',
-            'order' => 1,
+        'catalog_productalert_cron_error_email_template' => array(
+            'group' => 'productalert',
+            'conf' => 'catalog/productalert_cron/error_email_template',
         ) ,
-        'contacts_email_email_template' => array(
-            'conf' => 'contacts/email/email_template'
-        ) ,
+
+        /* Customer */
         'customer_create_account_email_template' => array(
+            'group' => 'customer',
             'conf' => 'customer/create_account/email_template',
             'customer' => 1,
         ) ,
         'customer_password_forgot_email_template' => array(
+            'group' => 'customer',
             'conf' => 'customer/password/forgot_email_template',
             'customer' => 1,
         ) ,
+
+        /* Newsletter */
         'newsletter_subscription_confirm_email_template' => array(
+            'group' => 'newsletter',
             'conf' => 'newsletter/subscription/confirm_email_template',
         ) ,
         'newsletter_subscription_success_email_template' => array(
+            'group' => 'newsletter',
             'conf' => 'newsletter/subscription/success_email_template',
         ) ,
         'newsletter_subscription_un_email_template' => array(
+            'group' => 'newsletter',
             'conf' => 'newsletter/subscription/un_email_template',
         ) ,
-        'sendfriend_email_template' => array(
-            'conf' => 'sendfriend/email/template'
+
+        /* Credit memo */
+        'sales_email_creditmemo_comment_guest_template' => array(
+            'group' => 'sales_creditmemo',
+            'conf' => 'sales_email/creditmemo_comment/guest_template',
+            'order' => 1,
+            'creditmemo' => 1,
         ) ,
         'sales_email_creditmemo_comment_template' => array(
+            'group' => 'sales_creditmemo',
             'conf' => 'sales_email/creditmemo_comment/template',
             'order' => 1,
             'creditmemo' => 1,
         ) ,
+        'sales_email_creditmemo_guest_template' => array(
+            'group' => 'sales_creditmemo',
+            'conf' => 'sales_email/creditmemo/guest_template',
+            'order' => 1,
+            'creditmemo' => 1,
+        ) ,
         'sales_email_creditmemo_template' => array(
+            'group' => 'sales_creditmemo',
             'conf' => 'sales_email/creditmemo/template',
             'order' => 1,
             'creditmemo' => 1,
         ) ,
+
+        /* Order */
+        'sales_email_order_comment_guest_template' => array(
+            'group' => 'sales_order',
+            'conf' => 'sales_email/order_comment/guest_template',
+            'order' => 1,
+        ) ,
         'sales_email_order_comment_template' => array(
+            'group' => 'sales_order',
             'conf' => 'sales_email/order_comment/template',
             'order' => 1,
         ) ,
+        'sales_email_order_guest_template' => array(
+            'group' => 'sales_order',
+            'conf' => 'sales_email/order/guest_template',
+            'order' => 1,
+        ) ,
         'sales_email_order_template' => array(
+            'group' => 'sales_order',
             'conf' => 'sales_email/order/template',
             'order' => 1,
         ) ,
+
+        /* Shipment */
+        'sales_email_shipment_comment_guest_template' => array(
+            'group' => 'sales_shipment',
+            'conf' => 'sales_email/shipment_comment/guest_template',
+            'order' => 1,
+            'shipment' => 1,
+        ) ,
         'sales_email_shipment_comment_template' => array(
+            'group' => 'sales_shipment',
             'conf' => 'sales_email/shipment_comment/template',
             'order' => 1,
             'shipment' => 1,
         ) ,
+        'sales_email_shipment_guest_template' => array(
+            'group' => 'sales_shipment',
+            'conf' => 'sales_email/shipment/guest_template',
+            'order' => 1,
+            'shipment' => 1,
+        ) ,
         'sales_email_shipment_template' => array(
+            'group' => 'sales_shipment',
             'conf' => 'sales_email/shipment/template',
             'order' => 1,
             'shipment' => 1,
         ) ,
+
+        /* Invoice */
+        'sales_email_invoice_comment_guest_template' => array(
+            'group' => 'sales_invoice',
+            'conf' => 'sales_email/invoice_comment/guest_template',
+            'order' => 1,
+            'invoice' => 1,
+        ) ,
         'sales_email_invoice_comment_template' => array(
+            'group' => 'sales_invoice',
             'conf' => 'sales_email/invoice_comment/template',
             'order' => 1,
             'invoice' => 1,
         ) ,
+        'sales_email_invoice_guest_template' => array(
+            'group' => 'sales_invoice',
+            'conf' => 'sales_email/invoice/guest_template',
+            'order' => 1,
+            'invoice' => 1,
+        ) ,
         'sales_email_invoice_template' => array(
+            'group' => 'sales_invoice',
             'conf' => 'sales_email/invoice/template',
             'order' => 1,
             'invoice' => 1,
         ) ,
+
+        /* Errors */
+        'checkout_payment_failed_template' => array(
+            'group' => 'errors',
+            'conf' => 'customer/create_account/email_template',
+            'order' => 1,
+        ) ,
+        'currency_import_error_email_template' => array(
+            'group' => 'errors',
+            'conf' => 'currency/import/error_email_template'
+        ) ,
+        'sitemap_generate_error_email_template' => array(
+            'group' => 'errors',
+            'conf' => 'sitemap/generate/error_email_template'
+        ) ,
+
+        /* Share */
+        'sendfriend_email_template' => array(
+            'group' => 'share',
+            'conf' => 'sendfriend/email/template'
+        ) ,
         'wishlist_email_email_template' => array(
+            'group' => 'share',
             'conf' => 'wishlist/email/email_template',
             'customer' => 1,
+        ) ,
+
+        /* Contact */
+        'contacts_email_email_template' => array(
+            'group' => 'others',
+            'conf' => 'contacts/email/email_template'
         ) ,
     );
 
@@ -218,6 +335,10 @@ class inteGentoEmailTester {
       Get templates
     ---------------------------------------------------------- */
 
+    function getGroups() {
+        return $this->groups;
+    }
+
     function getTemplates() {
         return $this->templates;
     }
@@ -260,6 +381,7 @@ class inteGentoEmailTester {
             'product_url' => 'https://github.com/Darklg',
             'product_name' => 'Fake Product Name',
             'product_image' => 'http://placehold.it/75x75',
+            'warnings' => '(EmailTester: Fake warnings) The world needs dreamers and the world needs doers. But above all, the world needs dreamers who do — Sarah Ban Breathnach. Everyone who has ever taken a shower has had an idea. It’s the person who gets out of the shower, dries off, and does something about it that makes a difference — Nolan Bushnell. ',
             'comment' => '(EmailTester: Fake comment) The world needs dreamers and the world needs doers. But above all, the world needs dreamers who do — Sarah Ban Breathnach. Everyone who has ever taken a shower has had an idea. It’s the person who gets out of the shower, dries off, and does something about it that makes a difference — Nolan Bushnell. ',
             'message' => '(EmailTester: Fake message) The world needs dreamers and the world needs doers. But above all, the world needs dreamers who do — Sarah Ban Breathnach. Everyone who has ever taken a shower has had an idea. It’s the person who gets out of the shower, dries off, and does something about it that makes a difference — Nolan Bushnell. ',
         );
