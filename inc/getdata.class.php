@@ -320,12 +320,11 @@ class inteGentoEmailTester {
             }
         endforeach;
 
-        $mid = array();
-        foreach ($templates as $key => $row) {
-            $mid[$key] = $row['name'];
-        }
-
-        array_multisort($mid, SORT_ASC, $templates);
+        // $mid = array();
+        // foreach ($templates as $key => $row) {
+        //     $mid[$key] = $row['name'];
+        // }
+        // array_multisort($mid, SORT_ASC, $templates);
 
         $this->templates = $templates;
         return $templates;
