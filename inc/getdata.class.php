@@ -220,7 +220,6 @@ class inteGentoEmailTester {
         @session_start();
         $this->baseDir = Mage::getBaseDir();
         $this->mailModel = Mage::getModel('core/email_template');
-        $this->localeCodeDefault = 'en_US';
         $this->emailBasePath = Mage::getBaseDir('locale') . DS . '%s' . DS . 'template' . DS . 'email' . DS;
         $this->setStore(0);
         $this->setTemplates($this->templates);
@@ -231,9 +230,7 @@ class inteGentoEmailTester {
         $this->store = $store;
         $this->storeName = Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME, $store);
         $this->storeEmail = Mage::getStoreConfig('trans_email/ident_general/email', $store);
-        $this->localeCode = Mage::getStoreConfig('general/locale/code', $store) ;
-        $this->emailPath = sprintf($this->emailBasePath, $this->localeCode);
-        $this->emailPathDefault = sprintf($this->emailBasePath, $this->localeCodeDefault);
+        $this->localeCode = Mage::getStoreConfig('general/locale/code', $store);
     }
 
     /* ----------------------------------------------------------
@@ -300,7 +297,7 @@ class inteGentoEmailTester {
         }
 
         $base_tpl = Mage::getConfig()->getNode('global/template/email')->asArray();
-        $default_templates = Mage::getModel('core/email_template')->getDefaultTemplatesAsOptionsArray();
+        $default_templates = $this->mailModel->getDefaultTemplatesAsOptionsArray();
         foreach ($default_templates as $_option):
             $val = $_option['value'];
             if (empty($val)) {
@@ -620,8 +617,7 @@ class inteGentoEmailTester {
 
     function setMailTemplateAndUseDatas($tpl, $store, $datas) {
         $_request = Mage::app()->getRequest()->getParams();
-        $this->mailTemplate = $this->mailModel->loadDefault($tpl);
-
+        $this->mailTemplate = $this->mailModel->loadDefault($tpl, $this->localeCode);
         $this->mailTemplate->setDesignConfig(array(
             'area' => 'frontend',
             'store' => $store
@@ -705,16 +701,9 @@ class inteGentoEmailTester {
         $_templateText = '';
         $_templateSrc = '';
 
-        // Get text from current locale
-        if (isset($_template['templates'][0]) && file_exists($this->emailPath . $_template['templates'][0])) {
-            $_templateSrc = $this->emailPath . $_template['templates'][0];
-            $_templateText = file_get_contents($_templateSrc);
-        }
-
-        // Get text from default locale
-        if (empty($_templateText) && isset($_template['templates'][0]) && file_exists($this->emailPathDefault . $_template['templates'][0])) {
-            $_templateSrc = $this->emailPathDefault . $_template['templates'][0];
-            $_templateText = file_get_contents($_templateSrc);
+        if (isset($_template['templates'], $_template['templates'][0])) {
+            $_templateSrc = $this->getTemplateTextPath($_template['templates'][0]);
+            $_templateText = Mage::app()->getTranslator()->getTemplateFile($_template['templates'][0], 'email', $this->localeCode);
         }
 
         // Get text from admin
@@ -731,6 +720,17 @@ class inteGentoEmailTester {
         include 'details.php';
 
         return;
+    }
+
+    function getTemplateTextPath($file) {
+        $_filePath = sprintf($this->emailBasePath, $this->localeCode);
+        if (!file_exists($_filePath . $file)) {
+            $_filePath = sprintf($this->emailBasePath, Mage::app()->getLocale()->getDefaultLocale());
+        }
+        if (!file_exists($_filePath . $file)) {
+            $_filePath = sprintf($this->emailBasePath, Mage_Core_Model_Locale::DEFAULT_LOCALE);
+        }
+        return $_filePath . $file;
     }
 
     function saveTemplateInAdmin($tpl, $datas) {
