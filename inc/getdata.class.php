@@ -59,9 +59,24 @@ class inteGentoEmailTester {
             'conf' => 'customer/create_account/email_template',
             'customer' => 1,
         ) ,
+        'customer_create_account_email_confirmation_template' => array(
+            'group' => 'customer',
+            'conf' => 'customer/create_account/email_confirmation_template',
+            'customer' => 1,
+        ) ,
+        'customer_create_account_email_confirmed_template' => array(
+            'group' => 'customer',
+            'conf' => 'customer/create_account/email_confirmed_template',
+            'customer' => 1,
+        ) ,
         'customer_password_forgot_email_template' => array(
             'group' => 'customer',
             'conf' => 'customer/password/forgot_email_template',
+            'customer' => 1,
+        ) ,
+        'customer_password_remind_email_template' => array(
+            'group' => 'customer',
+            'conf' => 'customer/password/remind_email_template',
             'customer' => 1,
         ) ,
 
@@ -205,10 +220,14 @@ class inteGentoEmailTester {
             'customer' => 1,
         ) ,
 
-        /* Contact */
+        /* Others */
         'contacts_email_email_template' => array(
             'group' => 'others',
             'conf' => 'contacts/email/email_template'
+        ) ,
+        'oauth_email_template' => array(
+            'group' => 'others',
+            'conf' => 'oauth/email/template'
         ) ,
     );
 
@@ -369,6 +388,9 @@ class inteGentoEmailTester {
             'viewOnSiteLink' => Mage::getUrl('*/shared/index', array(
                 'code' => 'foo'
             )) ,
+            'userName' => 'Jean-Michel Lorem',
+            'status' => 'Cancelled',
+            'applicationName' => 'MyApplication',
             'customerName' => 'Jean-Michel Lorem',
             'customerEmail' => $this->storeEmail,
             'name' => 'Jean-Michel Lorem',
@@ -657,8 +679,8 @@ class inteGentoEmailTester {
     }
 
     function sendTemplateByMail($email, $datas) {
-        $this->mailTemplate->setSenderName($this->storeName);
-        $this->mailTemplate->setSenderEmail($this->storeEmail);
+        $this->mailTemplate->setSenderName('Email Tester - Integento');
+        $this->mailTemplate->setSenderEmail($email);
         $this->mailTemplate->send($email, 'Email Tester', $datas);
         $this->addMessageAndRedirect('success', 'Mail has been successfully sent !');
         return;
