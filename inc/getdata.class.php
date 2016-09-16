@@ -2,6 +2,7 @@
 class inteGentoEmailTester {
 
     private $groups = array(
+        'aw_hdu' => 'aheadWorks : Help Desk Ultimate',
         'aw_hdu3' => 'aheadWorks : Help Desk Ultimate',
         'productalert' => 'Catalog : product alert',
         'customer' => 'Customer',
@@ -17,7 +18,7 @@ class inteGentoEmailTester {
 
     private $templates = array(
 
-        /* Help Desk Ultimate - aheadWorks */
+        /* Help Desk Ultimate 3 - aheadWorks */
         'aw_hdu3_to_customer_new_ticket_email' => array(
             'group' => 'aw_hdu3',
             'aw_hdu3' => 1
@@ -33,6 +34,24 @@ class inteGentoEmailTester {
         'aw_hdu3_to_customer_ticket_changed' => array(
             'group' => 'aw_hdu3',
             'aw_hdu3' => 1
+        ),
+
+        /* Help Desk Ultimate - aheadWorks */
+        'helpdeskultimate_to_customer_new_email' => array(
+            'group' => 'aw_hdu',
+            'aw_hdu' => 1
+        ),
+        'helpdeskultimate_to_customer_reply_email' => array(
+            'group' => 'aw_hdu',
+            'aw_hdu' => 1
+        ),
+        'helpdeskultimate_to_customer_reassign_email' => array(
+            'group' => 'aw_hdu',
+            'aw_hdu' => 1
+        ),
+        'helpdeskultimate_new_from_admin_to_customer' => array(
+            'group' => 'aw_hdu',
+            'aw_hdu' => 1
         ),
 
         /* Product alert */
@@ -311,6 +330,9 @@ class inteGentoEmailTester {
 
         foreach ($templates as $tpl_id => $tpl) {
             if (!isset($this->modulesArray['AW_Helpdesk3']) && isset($tpl['aw_hdu3'])) {
+                unset($templates[$tpl_id]);
+            }
+            if (!isset($this->modulesArray['AW_Helpdeskultimate']) && isset($tpl['aw_hdu'])) {
                 unset($templates[$tpl_id]);
             }
         }
