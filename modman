@@ -2,5 +2,6 @@ index.php
 inc/details.php
 inc/default.php
 inc/getdata.class.php
+inc/etc/config.xml
 assets/script.js
 assets/style.css

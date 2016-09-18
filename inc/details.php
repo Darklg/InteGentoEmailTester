@@ -50,6 +50,9 @@ if (!empty($_templateText)) {
     }
     else {
         echo '<button type="submit" id="button_save" name="save_admin_tpl">Save as admin Template</button>';
+        if(empty($_template['conf'])){
+            echo '<div><small>You will need to associate manually this template in the Magento admin.</small></div>';
+        }
     }
     echo '</div></form>';
 }

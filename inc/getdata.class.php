@@ -1,254 +1,8 @@
 <?php
 class inteGentoEmailTester {
 
-    private $groups = array(
-        'aw_hdu' => 'aheadWorks : Help Desk Ultimate',
-        'aw_hdu3' => 'aheadWorks : Help Desk Ultimate',
-        'productalert' => 'Catalog : product alert',
-        'customer' => 'Customer',
-        'newsletter' => 'Newsletter',
-        'sales_creditmemo' => 'Sales : Credit Memo',
-        'sales_order' => 'Sales : Order',
-        'sales_shipment' => 'Sales : Shipment',
-        'sales_invoice' => 'Sales : Invoice',
-        'errors' => 'Errors',
-        'share' => 'Share',
-        'others' => 'Others'
-    );
-
-    private $templates = array(
-
-        /* Help Desk Ultimate 3 - aheadWorks */
-        'aw_hdu3_to_customer_new_ticket_email' => array(
-            'group' => 'aw_hdu3',
-            'aw_hdu3' => 1
-        ),
-        'aw_hdu3_to_customer_new_ticket_by_admin_email' => array(
-            'group' => 'aw_hdu3',
-            'aw_hdu3' => 1
-        ),
-        'aw_hdu3_to_customer_new_reply_email' => array(
-            'group' => 'aw_hdu3',
-            'aw_hdu3' => 1
-        ),
-        'aw_hdu3_to_customer_ticket_changed' => array(
-            'group' => 'aw_hdu3',
-            'aw_hdu3' => 1
-        ),
-
-        /* Help Desk Ultimate - aheadWorks */
-        'helpdeskultimate_to_customer_new_email' => array(
-            'group' => 'aw_hdu',
-            'aw_hdu' => 1
-        ),
-        'helpdeskultimate_to_customer_reply_email' => array(
-            'group' => 'aw_hdu',
-            'aw_hdu' => 1
-        ),
-        'helpdeskultimate_to_customer_reassign_email' => array(
-            'group' => 'aw_hdu',
-            'aw_hdu' => 1
-        ),
-        'helpdeskultimate_new_from_admin_to_customer' => array(
-            'group' => 'aw_hdu',
-            'aw_hdu' => 1
-        ),
-
-        /* Product alert */
-        'catalog_productalert_email_price_template' => array(
-            'group' => 'productalert',
-            'conf' => 'catalog/productalert/email_price_template',
-            'alertGrid' => 1,
-            'customer' => 1
-        ),
-        'catalog_productalert_email_stock_template' => array(
-            'group' => 'productalert',
-            'conf' => 'catalog/productalert/email_stock_template',
-            'alertGrid' => 1,
-            'customer' => 1
-        ),
-        'catalog_productalert_cron_error_email_template' => array(
-            'group' => 'productalert',
-            'conf' => 'catalog/productalert_cron/error_email_template'
-        ),
-
-        /* Customer */
-        'customer_create_account_email_template' => array(
-            'group' => 'customer',
-            'conf' => 'customer/create_account/email_template',
-            'customer' => 1
-        ),
-        'customer_create_account_email_confirmation_template' => array(
-            'group' => 'customer',
-            'conf' => 'customer/create_account/email_confirmation_template',
-            'customer' => 1
-        ),
-        'customer_create_account_email_confirmed_template' => array(
-            'group' => 'customer',
-            'conf' => 'customer/create_account/email_confirmed_template',
-            'customer' => 1
-        ),
-        'customer_password_forgot_email_template' => array(
-            'group' => 'customer',
-            'conf' => 'customer/password/forgot_email_template',
-            'customer' => 1
-        ),
-        'customer_password_remind_email_template' => array(
-            'group' => 'customer',
-            'conf' => 'customer/password/remind_email_template',
-            'customer' => 1
-        ),
-
-        /* Newsletter */
-        'newsletter_subscription_confirm_email_template' => array(
-            'group' => 'newsletter',
-            'conf' => 'newsletter/subscription/confirm_email_template'
-        ),
-        'newsletter_subscription_success_email_template' => array(
-            'group' => 'newsletter',
-            'conf' => 'newsletter/subscription/success_email_template'
-        ),
-        'newsletter_subscription_un_email_template' => array(
-            'group' => 'newsletter',
-            'conf' => 'newsletter/subscription/un_email_template'
-        ),
-
-        /* Credit memo */
-        'sales_email_creditmemo_comment_guest_template' => array(
-            'group' => 'sales_creditmemo',
-            'conf' => 'sales_email/creditmemo_comment/guest_template',
-            'order' => 1,
-            'creditmemo' => 1
-        ),
-        'sales_email_creditmemo_comment_template' => array(
-            'group' => 'sales_creditmemo',
-            'conf' => 'sales_email/creditmemo_comment/template',
-            'order' => 1,
-            'creditmemo' => 1
-        ),
-        'sales_email_creditmemo_guest_template' => array(
-            'group' => 'sales_creditmemo',
-            'conf' => 'sales_email/creditmemo/guest_template',
-            'order' => 1,
-            'creditmemo' => 1
-        ),
-        'sales_email_creditmemo_template' => array(
-            'group' => 'sales_creditmemo',
-            'conf' => 'sales_email/creditmemo/template',
-            'order' => 1,
-            'creditmemo' => 1
-        ),
-
-        /* Order */
-        'sales_email_order_comment_guest_template' => array(
-            'group' => 'sales_order',
-            'conf' => 'sales_email/order_comment/guest_template',
-            'order' => 1
-        ),
-        'sales_email_order_comment_template' => array(
-            'group' => 'sales_order',
-            'conf' => 'sales_email/order_comment/template',
-            'order' => 1
-        ),
-        'sales_email_order_guest_template' => array(
-            'group' => 'sales_order',
-            'conf' => 'sales_email/order/guest_template',
-            'order' => 1
-        ),
-        'sales_email_order_template' => array(
-            'group' => 'sales_order',
-            'conf' => 'sales_email/order/template',
-            'order' => 1
-        ),
-
-        /* Shipment */
-        'sales_email_shipment_comment_guest_template' => array(
-            'group' => 'sales_shipment',
-            'conf' => 'sales_email/shipment_comment/guest_template',
-            'order' => 1,
-            'shipment' => 1
-        ),
-        'sales_email_shipment_comment_template' => array(
-            'group' => 'sales_shipment',
-            'conf' => 'sales_email/shipment_comment/template',
-            'order' => 1,
-            'shipment' => 1
-        ),
-        'sales_email_shipment_guest_template' => array(
-            'group' => 'sales_shipment',
-            'conf' => 'sales_email/shipment/guest_template',
-            'order' => 1,
-            'shipment' => 1
-        ),
-        'sales_email_shipment_template' => array(
-            'group' => 'sales_shipment',
-            'conf' => 'sales_email/shipment/template',
-            'order' => 1,
-            'shipment' => 1
-        ),
-
-        /* Invoice */
-        'sales_email_invoice_comment_guest_template' => array(
-            'group' => 'sales_invoice',
-            'conf' => 'sales_email/invoice_comment/guest_template',
-            'order' => 1,
-            'invoice' => 1
-        ),
-        'sales_email_invoice_comment_template' => array(
-            'group' => 'sales_invoice',
-            'conf' => 'sales_email/invoice_comment/template',
-            'order' => 1,
-            'invoice' => 1
-        ),
-        'sales_email_invoice_guest_template' => array(
-            'group' => 'sales_invoice',
-            'conf' => 'sales_email/invoice/guest_template',
-            'order' => 1,
-            'invoice' => 1
-        ),
-        'sales_email_invoice_template' => array(
-            'group' => 'sales_invoice',
-            'conf' => 'sales_email/invoice/template',
-            'order' => 1,
-            'invoice' => 1
-        ),
-
-        /* Errors */
-        'checkout_payment_failed_template' => array(
-            'group' => 'errors',
-            'conf' => 'customer/create_account/email_template',
-            'order' => 1
-        ),
-        'currency_import_error_email_template' => array(
-            'group' => 'errors',
-            'conf' => 'currency/import/error_email_template'
-        ),
-        'sitemap_generate_error_email_template' => array(
-            'group' => 'errors',
-            'conf' => 'sitemap/generate/error_email_template'
-        ),
-
-        /* Share */
-        'sendfriend_email_template' => array(
-            'group' => 'share',
-            'conf' => 'sendfriend/email/template'
-        ),
-        'wishlist_email_email_template' => array(
-            'group' => 'share',
-            'conf' => 'wishlist/email/email_template',
-            'customer' => 1
-        ),
-
-        /* Others */
-        'contacts_email_email_template' => array(
-            'group' => 'others',
-            'conf' => 'contacts/email/email_template'
-        ),
-        'oauth_email_template' => array(
-            'group' => 'others',
-            'conf' => 'oauth/email/template'
-        )
-    );
+    private $groups;
+    private $templates;
 
     /* ----------------------------------------------------------
       Init
@@ -256,10 +10,12 @@ class inteGentoEmailTester {
 
     public function __construct() {
         @session_start();
+        $this->config_file = INTEGENTOEMAILTESTER_PATH . 'inc/etc/config.xml';
         $this->baseDir = Mage::getBaseDir();
         $this->mailModel = Mage::getModel('core/email_template');
         $this->emailBasePath = Mage::getBaseDir('locale') . DS . '%s' . DS . 'template' . DS . 'email' . DS;
         $this->setStore(0);
+        $this->loadTemplates();
         $this->setTemplates($this->templates);
         $this->setMessages();
     }
@@ -320,14 +76,40 @@ class inteGentoEmailTester {
     }
 
     /* ----------------------------------------------------------
-      Set class
+      Templates
     ---------------------------------------------------------- */
+
+    public function loadTemplates() {
+        $this->groups = array();
+        $this->templates = array();
+        if (file_exists($this->config_file)) {
+            $xml = simplexml_load_file($this->config_file);
+            if (!isset($xml->templates,$xml->groups)) {
+                return false;
+            }
+            $arr_templates = (array) $xml->templates;
+            foreach ($arr_templates as $id => $template) {
+                if ($id == 'comment') {
+                    continue;
+                }
+                $templates[$id] = (array) $template;
+            }
+            $arr_groups = (array) $xml->groups;
+            foreach ($arr_groups as $id => $group) {
+                if ($id == 'comment' || !isset($group->name)) {
+                    continue;
+                }
+                $groups[$id] = (string) $group->name;
+            }
+        }
+        $this->templates = $templates;
+        $this->groups = $groups;
+    }
 
     public function setTemplates($templates) {
 
         $modules = Mage::getConfig()->getNode('modules')->children();
         $this->modulesArray = (array) $modules;
-
         foreach ($templates as $tpl_id => $tpl) {
             if (!isset($this->modulesArray['AW_Helpdesk3']) && isset($tpl['aw_hdu3'])) {
                 unset($templates[$tpl_id]);

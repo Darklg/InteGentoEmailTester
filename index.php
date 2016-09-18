@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Email tester v 0.29
+ * Email tester v 0.30
  *
  * @author      Darklg <darklg.blog@gmail.com>
  * @copyright   Copyright (c) 2015 Darklg
  * @license     MIT
  */
 
-$testerVersion = '0_29';
+$testerVersion = '0_30';
 $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
-
+define('INTEGENTOEMAILTESTER_PATH', dirname(__FILE__) . '/');
 /* ----------------------------------------------------------
   Load Magento
 ---------------------------------------------------------- */
@@ -22,7 +22,7 @@ $cachePrefixKey = 'integento__emailtester__' . $testerVersion . '__';
 
 $_mageAppName = 'app/Mage.php';
 $_fileExists = false;
-for ($i = 0;$i < 5;$i++) {
+for ($i = 0; $i < 5; $i++) {
     $_testFileName = str_repeat("../", $i) . $_mageAppName;
     if (file_exists($_testFileName)) {
         $_fileExists = true;
@@ -43,7 +43,7 @@ Mage::app();
 /* Set system
  -------------------------- */
 
-require_once ('inc/getdata.class.php');
+require_once 'inc/getdata.class.php';
 $inteGentoEmailTester = new inteGentoEmailTester();
 
 /* Get values
@@ -63,7 +63,6 @@ if (!isset($_GET['template']) || !array_key_exists($_GET['template'], $_template
     die;
 }
 $_SESSION['integento__emailtester__tpl'] = $tpl;
-
 
 /* ----------------------------------------------------------
   Translate
@@ -85,4 +84,3 @@ Mage::getSingleton('core/translate')->setLocale($_locale)->init('frontend', true
 
 $datas = $inteGentoEmailTester->getDefaultData($_store, $tpl);
 $inteGentoEmailTester->setMailTemplateAndUseDatas($tpl, $_store, $datas);
-
