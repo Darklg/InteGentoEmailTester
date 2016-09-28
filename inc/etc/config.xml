@@ -7,6 +7,9 @@
         <aw_hdu3>
             <name>aheadWorks : Help Desk Ultimate</name>
         </aw_hdu3>
+        <aw_rma>
+            <name>aheadWorks : Return merchandise authorization</name>
+        </aw_rma>
         <productalert>
             <name>Catalog : product alert</name>
         </productalert>
@@ -75,6 +78,18 @@
             <group>aw_hdu</group>
             <aw_hdu>1</aw_hdu>
         </helpdeskultimate_new_from_admin_to_customer>
+
+        <!-- aheadWorks : Return merchandise authorization -->
+        <awrma_templates_customer_base_template>
+            <group>aw_rma</group>
+            <aw_rma>1</aw_rma>
+            <conf>awrma/templates/customer_base_template</conf>
+        </awrma_templates_customer_base_template>
+        <awrma_templates_admin_base_template>
+            <group>aw_rma</group>
+            <aw_rma>1</aw_rma>
+            <conf>awrma/templates/admin_base_template</conf>
+        </awrma_templates_admin_base_template>
 
         <!-- Product alert -->
         <catalog_productalert_email_price_template>

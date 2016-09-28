@@ -84,7 +84,7 @@ class inteGentoEmailTester {
         $this->templates = array();
         if (file_exists($this->config_file)) {
             $xml = simplexml_load_file($this->config_file);
-            if (!isset($xml->templates,$xml->groups)) {
+            if (!isset($xml->templates, $xml->groups)) {
                 return false;
             }
             $arr_templates = (array) $xml->templates;
@@ -112,6 +112,9 @@ class inteGentoEmailTester {
         $this->modulesArray = (array) $modules;
         foreach ($templates as $tpl_id => $tpl) {
             if (!isset($this->modulesArray['AW_Helpdesk3']) && isset($tpl['aw_hdu3'])) {
+                unset($templates[$tpl_id]);
+            }
+            if (!isset($this->modulesArray['AW_Rma']) && isset($tpl['aw_rma'])) {
                 unset($templates[$tpl_id]);
             }
             if (!isset($this->modulesArray['AW_Helpdeskultimate']) && isset($tpl['aw_hdu'])) {
@@ -337,6 +340,20 @@ class inteGentoEmailTester {
             $datas['ticket_status'] = 'Waiting for reply';
             $datas['ticket_uid'] = 'OBO-46271';
             $datas['ticket_subject'] = 'The world needs dreamers and the world needs doers.';
+        }
+
+        /* AW RMA
+         -------------------------- */
+
+        if (isset($template['aw_rma'])) {
+            $_rmaList = Mage::getModel('awrma/entity')->getCollection()
+                ->setPageSize(1)
+                ->setOrder('created_at', 'DESC');
+
+            foreach ($_rmaList as $_rma) {
+                $datas['request'] = Mage::getModel('awrma/entity')->load($_rma->getId());
+                continue;
+            }
         }
         return $datas;
     }
