@@ -190,12 +190,8 @@ class inteGentoEmailTester {
         $datas = array(
             'store' => $this->stores[$store],
             'salable' => 'yes',
-            'addAllLink' => Mage::getUrl('*/shared/allcart', array(
-                'code' => 'foo'
-            )),
-            'viewOnSiteLink' => Mage::getUrl('*/shared/index', array(
-                'code' => 'foo'
-            )),
+            'addAllLink' => '#',
+            'viewOnSiteLink' => '#',
             'userName' => 'Jean-Michel Lorem',
             'status' => 'Cancelled',
             'applicationName' => 'MyApplication',
@@ -324,8 +320,19 @@ class inteGentoEmailTester {
          -------------------------- */
 
         if ($tpl == 'wishlist_email_email_template') {
-            $datas['items'] = $this->getWishlistItems();
+            $wishlist = Mage::registry('wishlist');
             $datas['message'] = 'Please buy this';
+            $datas['items'] = '<p>We couldnt find a wishlist in your store.</p>';
+            if (is_object($wishlist)) {
+                $sharingCode = $wishlist->getSharingCode();
+                $datas['items'] = $this->getWishlistItems();
+                $datas['addAllLink'] = Mage::getUrl('*/shared/allcart', array(
+                    'code' => $sharingCode
+                ));
+                $datas['viewOnSiteLink'] = Mage::getUrl('*/shared/index', array(
+                    'code' => $sharingCode
+                ));
+            }
         }
 
         /* AW Help Desk 3
