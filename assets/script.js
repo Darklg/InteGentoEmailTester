@@ -13,6 +13,9 @@ function $__(id) {
         $__('button_preview').addEventListener('click', function(e) {
             form.target = 'preview';
         }, false);
+        $__('button_open').addEventListener('click', function(e) {
+            form.target = '_blank';
+        }, false);
         $__('button_send').addEventListener('click', function(e) {
             form.target = '_self';
             if ($__('email').value == '') {

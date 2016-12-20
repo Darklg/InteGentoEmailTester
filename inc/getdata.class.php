@@ -674,9 +674,14 @@ class inteGentoEmailTester {
     }
 
     public function displayTemplate($datas) {
-        header('Content-Type: text/html; charset=utf-8');
+        /* Retrieve email content */
         $_template = $this->mailTemplate->getProcessedTemplate($datas, true);
-        $_template = str_replace('InteGentoEmailTester', '', $_template);
+        /* Filter content to avoid bugs */
+        $_installPath = explode('/', realpath(dirname(__FILE__) . '/..'));
+        $_folderName = '/' . $_installPath[count($_installPath) - 1];
+        $_template = str_replace($_folderName, '', $_template);
+        /* Display mail template */
+        header('Content-Type: text/html; charset=utf-8');
         echo $_template;
     }
 }

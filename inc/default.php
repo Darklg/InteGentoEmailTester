@@ -65,6 +65,7 @@ echo '</select></p>';
 echo '<p id="box-email"><label for="email">Email</label><input type="email" id="email" name="email" value="'.(isset($_SESSION['integento__emailtester__email']) ? $_SESSION['integento__emailtester__email'] : '').'" /></p>';
 
 ?>
+<button type="submit" id="button_open" name="submit">Open</button>
 <button type="submit" id="button_preview" name="submit">Preview</button>
 <button type="submit" id="button_details" name="get_template_details">Details</button>
 <button type="submit" id="button_send" name="send">Send by email</button>
